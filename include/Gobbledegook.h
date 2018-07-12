@@ -63,6 +63,8 @@
 //           EFailedRun  - the server had a failure during the ERunning state
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#include <map>
+
 #pragma once
 
 #ifdef __cplusplus
@@ -220,7 +222,7 @@ extern "C"
 	//
 	//     Retrieve this value using the `getAdvertisingShortName()` method
 	//
-	int ggkStart(const char *pServiceName, const char *pAdvertisingName, const char *pAdvertisingShortName, 
+	int ggkStart(const std::map<const std::string, const std::string> &dataMap, 
 		GGKServerDataGetter getter, GGKServerDataSetter setter, int maxAsyncInitTimeoutMS);
 
 	// Blocks for up to maxAsyncInitTimeoutMS milliseconds until the server shuts down.

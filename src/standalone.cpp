@@ -106,6 +106,7 @@
 #include <iostream>
 #include <thread>
 #include <sstream>
+#include <map>
 
 #include "../include/Gobbledegook.h"
 
@@ -299,7 +300,9 @@ int main(int argc, char **ppArgv)
 	//     This first parameter (the service name) must match tha name configured in the D-Bus permissions. See the Readme.md file
 	//     for more information.
 	//
-	if (!ggkStart("gobbledegook", "Gobbledegook", "Gobbledegook", dataGetter, dataSetter, kMaxAsyncInitTimeoutMS))
+        const std::map<const std::string, const std::string> foo;
+	//if (!ggkStart("bledoppler", "Gobbledegook", "Gobbledegook", dataGetter, dataSetter, kMaxAsyncInitTimeoutMS))
+	if (!ggkStart(foo, dataGetter, dataSetter, kMaxAsyncInitTimeoutMS))
 	{
 		return -1;
 	}

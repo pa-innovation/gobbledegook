@@ -448,7 +448,7 @@ int ggkWait()
 //
 //     Retrieve this value using the `getAdvertisingShortName()` method
 //
-int ggkStart(const char *pServiceName, const char *pAdvertisingName, const char *pAdvertisingShortName, 
+int ggkStart(const std::map<const std::string, const std::string> &dataMap, 
 	GGKServerDataGetter getter, GGKServerDataSetter setter, int maxAsyncInitTimeoutMS)
 {
 	try
@@ -491,10 +491,11 @@ int ggkStart(const char *pServiceName, const char *pAdvertisingName, const char 
 			}
 		}, nullptr);
 
-		Logger::info(SSTR << "Starting GGK server '" << pAdvertisingName << "'");
+                std::string servName = dataMap.at("advertisingName");
+		Logger::info(SSTR << "Starting GGK server '" << servName << "'");
 
 		// Allocate our server
-		TheServer = std::make_shared<Server>(pServiceName, pAdvertisingName, pAdvertisingShortName, getter, setter);
+		TheServer = std::make_shared<Server>(dataMap, getter, setter);
 
 		// Start our server thread
 		try

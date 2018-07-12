@@ -39,6 +39,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
 #include <memory>
 
 #include "../include/Gobbledegook.h"
@@ -165,7 +166,7 @@ struct Server
 	//
 	//     Retrieve this value using the `getAdvertisingShortName()` method.
 	//
-	Server(const std::string &serviceName, const std::string &advertisingName, const std::string &advertisingShortName, 
+	Server(const std::map<const std::string, const std::string> &dataMap,
 		GGKServerDataGetter getter, GGKServerDataSetter setter);
 
 	//
