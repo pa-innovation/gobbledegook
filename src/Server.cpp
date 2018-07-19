@@ -714,6 +714,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
                 // Update the text string value to trigger the callback
+	            // HACK: put a dummy value on the data (should actually be a vector<uint8_t>
                 self.setDataPointer("wifi/ssid_list", "");
 
                 // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
@@ -728,8 +729,9 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // We can handle updates in any way we wish, but the most common use is to send a change notification.
             .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
             {
-                const char *pTextString = self.getDataPointer<const char *>("wifi/ssid_list", "");
-                self.sendChangeNotificationValue(pConnection, pTextString);
+	            vector<guint8> val;
+                val = self.getDataValue<const vector<guint8>>("wifi/ssid_list", val);
+                self.sendChangeNotificationValue(pConnection, val);
                 return true;
             })
 
@@ -844,8 +846,9 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // We can handle updates in any way we wish, but the most common use is to send a change notification.
             .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
             {
-                const char *pTextString = self.getDataPointer<const char *>("alarm/alarm_list", "");
-                self.sendChangeNotificationValue(pConnection, pTextString);
+                vector<guint8> val;
+                val = self.getDataValue<const vector<guint8>>("wifi/ssid_list", val);
+                self.sendChangeNotificationValue(pConnection, val);
                 return true;
             })
 
