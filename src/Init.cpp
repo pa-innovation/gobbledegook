@@ -689,6 +689,10 @@ void configureAdapter()
 	HciAdapter::ControllerInformation info = HciAdapter::getInstance().getControllerInformation();
 
 	// Are all of our settings the way we want them?
+
+        Logger::debug(SSTR << (info.currentSettings.isSet(HciAdapter::EHciBasicRate_EnhancedDataRate) ? "AdON":"AdOFF") << " AT STARTUP!");
+        Logger::debug(SSTR << (TheServer->getEnableBREDR() ? "AddON":"AddOFF") << " AT STARTUP!");
+
 	bool pwFlag = info.currentSettings.isSet(HciAdapter::EHciPowered) == true;
 	bool leFlag = info.currentSettings.isSet(HciAdapter::EHciLowEnergy) == true;
 	bool brFlag = info.currentSettings.isSet(HciAdapter::EHciBasicRate_EnhancedDataRate) == TheServer->getEnableBREDR();
