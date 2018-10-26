@@ -262,7 +262,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	enableSecureConnection = false;
 	enableConnectable = true;
 	enableAdvertising = true;
-	enableBondable = false;
+	enableBondable = true;
 
 	//
 	// Define the server
@@ -301,7 +301,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 			// Standard characteristic "ReadValue" method call
 			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
 			{
-				self.methodReturnValue(pInvocation, "Sandman Doppler", true);
+				self.methodReturnValue(pInvocation, "Sandman", true);
 			})
 
 		.gattCharacteristicEnd()
@@ -358,114 +358,6 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 
 		.gattCharacteristicEnd()
 
-	.gattServiceEnd()
-
-	// Current Time Service (0x1805)
-	//
-	// This is a time service that conforms to org.bluetooth.service.current_time. For details, see:
-	//
-	//    https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.service.current_time.xml
-	//
-	// Like the battery service, this also makes use of events. This one updates the time every tick.
-	//
-	// This showcases the use of events (see the call to .onEvent() below) for periodic actions. In this case, the action
-	// taken is to update time every tick. This probably isn't a good idea for a production service, but it has been quite
-	// useful for testing to ensure we're connected and updating.
-	.gattServiceBegin("time", "1805")
-
-		// Characteristic: Current Time (0x2A2B)
-		//
-		// See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.current_time.xml
-		.gattCharacteristicBegin("current", "2A2B", {"read", "notify"})
-
-			// Standard characteristic "ReadValue" method call
-			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
-			{
-				self.methodReturnVariant(pInvocation, ServerUtils::gvariantCurrentTime(), true);
-			})
-
-			// Update the time every tick of the periodic timer
-			//
-			// We'll send an change notification to any subscribed clients with the latest value
-			.onEvent(1, nullptr, CHARACTERISTIC_EVENT_CALLBACK_LAMBDA
-			{
-				self.sendChangeNotificationVariant(pConnection, ServerUtils::gvariantCurrentTime());
-			})
-
-		.gattCharacteristicEnd()
-
-		// Characteristic: Local Time Information (0x2A0F)
-		//
-		// See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.characteristic.local_time_information.xml
-		.gattCharacteristicBegin("local", "2A0F", {"read"})
-
-			// Standard characteristic "ReadValue" method call
-			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
-			{
-				self.methodReturnVariant(pInvocation, ServerUtils::gvariantLocalTime(), true);
-			})
-
-		.gattCharacteristicEnd()
-	.gattServiceEnd()
-
-	// Custom read/write text string service (00000001-1E3C-FAD4-74E2-97A033F1BFAA)
-	//
-	// This service will return a text string value (default: 'Hello, world!'). If the text value is updated, it will notify
-	// that the value has been updated and provide the new text from that point forward.
-	.gattServiceBegin("otherhardware", "00000001-1E3C-FAD4-74E2-97A033F1BFAA")
-
-		// Characteristic: String value (custom: 00000002-1E3C-FAD4-74E2-97A033F1BFAA)
-		.gattCharacteristicBegin("string", "00000002-1E3C-FAD4-74E2-97A033F1BFAA", {"read", "write", "notify"})
-
-			// Standard characteristic "ReadValue" method call
-			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
-			{
-	            cout << "DEBUG: read lambda " << endl;
-				const char *pTextString = self.getDataPointer<const char *>("otherhardware/string", "");
-				self.methodReturnValue(pInvocation, pTextString, true);
-			})
-
-			// Standard characteristic "WriteValue" method call
-			.onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
-			{
-	            cout << "DEBUG: write lambda " << endl;
-				// Update the text string value
-				GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
-				self.setDataPointer("otherhardware/string", Utils::stringFromGVariantByteArray(pAyBuffer).c_str());
-
-				// Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
-				// Characteristic interface (which just so happens to be the same interface passed into our self
-				// parameter) we can that parameter to call our own onUpdatedValue method
-				self.callOnUpdatedValue(pConnection, pUserData);
-			})
-
-			// Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
-			// updates to our value. These updates may have come from our own server or some other source.
-			//
-			// We can handle updates in any way we wish, but the most common use is to send a change notification.
-			.onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
-			{
-	            cout << "DEBUG: notify lambda " << endl;
-				const char *pTextString = self.getDataPointer<const char *>("otherhardware/string", "");
-				self.sendChangeNotificationValue(pConnection, pTextString);
-				return true;
-			})
-
-			// GATT Descriptor: Characteristic User Description (0x2901)
-			// 
-			// See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
-			.gattDescriptorBegin("description", "2901", {"read"})
-
-				// Standard descriptor "ReadValue" method call
-				.onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
-				{
-					const char *pDescription = "A mutable text string used for testing. Read and write to me, it tickles!";
-					self.methodReturnValue(pInvocation, pDescription, true);
-				})
-
-			.gattDescriptorEnd()
-
-		.gattCharacteristicEnd()
 	.gattServiceEnd()
 
 	// Custom Doppler Hardware service
@@ -691,14 +583,14 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Standard descriptor "ReadValue" method call
                 .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
                 {
-                    const char *pDescription = "Brightness to set the display and button LEDs as a percent.";
+                    const char *pDescription = "Volume to set the system to as a percent.";
                     self.methodReturnValue(pInvocation, pDescription, true);
                 })
 
             .gattDescriptorEnd()
 
         .gattCharacteristicEnd()
-	.gattServiceEnd()
+    .gattServiceEnd()
 
     // Custom Wifi Settings Service (custom: 5f4615cc1cb44da9a8409d5266d65d0e)
     //
@@ -847,7 +739,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
             {
                 vector<guint8> val;
-                val = self.getDataValue<const vector<guint8>>("wifi/ssid_list", val);
+                val = self.getDataValue<const vector<guint8>>("alarm/alarm_list", val);
                 self.sendChangeNotificationValue(pConnection, val);
                 return true;
             })
@@ -1004,6 +896,44 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             .gattDescriptorEnd()
 
         .gattCharacteristicEnd()
+
+        // Characteristic: Alarm Sound List (custom: ada4d25b255e441582d5ec6de21771c2)
+        .gattCharacteristicBegin("sounds", "ada4d25b255e441582d5ec6de21771c2", {"read"})
+
+            // Standard characteristic "ReadValue" method call
+            .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                const char *sounds = self.getDataPointer<const char *>("alarm/sounds", "");
+                self.methodReturnValue(pInvocation, sounds, true);
+            })
+
+            // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
+            // updates to our value. These updates may have come from our own server or some other source.
+            //
+            // We can handle updates in any way we wish, but the most common use is to send a change notification.
+            .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
+            {
+                const char *sounds = self.getDataPointer<const char *>("alarm/sounds", "");
+                self.sendChangeNotificationValue(pConnection, sounds);
+                return true;
+            })
+
+            // GATT Descriptor: Characteristic User Description (0x2901)
+            //
+            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+            .gattDescriptorBegin("description", "2901", {"read"})
+
+                // Standard descriptor "ReadValue" method call
+                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+                {
+                    const char *pDescription = "List of sound filenames separated by '/' characters";
+                    self.methodReturnValue(pInvocation, pDescription, true);
+                })
+
+            .gattDescriptorEnd()
+
+        .gattCharacteristicEnd()
+
     .gattServiceEnd()
 
     // Service: Doppler Software (custom: e0339a93c7694f8fb39d8bc94feb183c)
@@ -1589,6 +1519,233 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             .gattDescriptorEnd()
 
         .gattCharacteristicEnd()
+
+        .gattServiceEnd()
+
+	// Custom Doppler Time service
+	//
+	// This service will get and set the time and timezone
+
+	// Service: Doppler Time (custom: 3eda5f6eb32f48c48475dbf1de865d04)
+	.gattServiceBegin("doptime", "3eda5f6eb32f48c48475dbf1de865d04")
+
+		// Characteristic: The UTC time currently set on doppler (custom: 83a20a54cc854e208cdc619a05cee43b)
+		.gattCharacteristicBegin("utctime", "83a20a54cc854e208cdc619a05cee43b", {"read", "write"})
+
+			// Standard characteristic "ReadValue" method call
+			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+			{
+	            const uint8_t *pTimeData = self.getDataPointer<const uint8_t *>("doptime/utctime", nullptr);
+	            /* normally would call
+	             * self.methodReturnVariant(pInvocation, pColorData, true);
+	             * but that converts as an empty char string if the first data is 0, so do it the long way.
+	             */
+	            // this is just what that internal call would do anyway, forcing a conversion as a byte array
+	            GVariant *pVariant = Utils::gvariantFromByteArray(pTimeData, 2);
+	            self.methodReturnVariant(pInvocation, pVariant, true);
+			})
+
+			// Standard characteristic "WriteValue" method call
+			.onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+			{
+                gsize size;
+                gconstpointer pPtr = g_variant_get_fixed_array(const_cast<GVariant *>(g_variant_get_child_value(pParameters, 0)), &size, 1);
+
+                self.setDataPointer("doptime/utctime", pPtr);
+
+                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+                // Characteristic interface (which just so happens to be the same interface passed into our self
+                // parameter) we can that parameter to call our own onUpdatedValue method
+                self.callOnUpdatedValue(pConnection, pUserData);
+			})
+
+            // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
+            // updates to our value. These updates may have come from our own server or some other source.
+            //
+            // We can handle updates in any way we wish, but the most common use is to send a change notification.
+            .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
+            {
+                const char *pTimeData = self.getDataPointer<const char *>("doptime/utctime", "");
+                self.sendChangeNotificationValue(pConnection, pTimeData);
+                return true;
+            })
+
+			// GATT Descriptor: Characteristic User Description (0x2901)
+			// 
+			// See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+			.gattDescriptorBegin("description", "2901", {"read"})
+
+				// Standard descriptor "ReadValue" method call
+				.onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+				{
+					const char *pDescription = "Get and set UTC time. 2 byte array: 1st byte is hour, 2nd byte is minute.";
+					self.methodReturnValue(pInvocation, pDescription, true);
+				})
+
+			.gattDescriptorEnd()
+
+		.gattCharacteristicEnd()
+
+
+        // Characteristic: Extra time offset minutes (custom: 64f9476b044c479e994fa6fd18a9f9df)
+        .gattCharacteristicBegin("offset", "64f9476b044c479e994fa6fd18a9f9df", {"read", "write"})
+
+            // Standard characteristic "ReadValue" method call
+            .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                const uint8_t offset = self.getDataValue<const uint8_t>("doptime/offset", 0);
+                self.methodReturnValue(pInvocation, offset, true);
+            })
+
+            // Standard characteristic "WriteValue" method call
+            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+	            GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
+	            gsize size;
+	            gconstpointer pPtr = g_variant_get_fixed_array(const_cast<GVariant *>(pAyBuffer), &size, 1);
+	            // TODO: check size == 1
+                uint8_t offset = *static_cast<const uint8_t *>(pPtr);
+
+                self.setDataValue("doptime/offset", offset);
+
+                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+                // Characteristic interface (which just so happens to be the same interface passed into our self
+                // parameter) we can that parameter to call our own onUpdatedValue method
+                self.callOnUpdatedValue(pConnection, &offset);
+            })
+
+            // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
+            // updates to our value. These updates may have come from our own server or some other source.
+            //
+            // We can handle updates in any way we wish, but the most common use is to send a change notification.
+            .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
+            {
+	            const uint8_t offset = self.getDataValue<const uint8_t>("doptime/offset", 0);
+                self.sendChangeNotificationValue(pConnection, offset);
+                return true;
+            })
+
+            // GATT Descriptor: Characteristic User Description (0x2901)
+            //
+            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+            .gattDescriptorBegin("description", "2901", {"read"})
+
+                // Standard descriptor "ReadValue" method call
+                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+                {
+                    const char *pDescription = "Minutes of offset to add to the final time. Data is a single signed byte";
+                    self.methodReturnValue(pInvocation, pDescription, true);
+                })
+
+            .gattDescriptorEnd()
+
+        .gattCharacteristicEnd()
+
+
+        // Characteristic: Timezone (custom: 60a562e87ed44a32a7960b342a784139)
+        .gattCharacteristicBegin("timezone", "60a562e87ed44a32a7960b342a784139", {"read", "write"})
+
+            // Standard characteristic "ReadValue" method call
+            .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                const char *tz = self.getDataPointer<const char *>("doptime/timezone", "");
+                self.methodReturnValue(pInvocation, tz, true);
+            })
+
+            // Standard characteristic "WriteValue" method call
+            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                // Update the text string value
+                GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
+                self.setDataPointer("doptime/timezone", Utils::stringFromGVariantByteArray(pAyBuffer).c_str());
+
+                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+                // Characteristic interface (which just so happens to be the same interface passed into our self
+                // parameter) we can that parameter to call our own onUpdatedValue method
+                self.callOnUpdatedValue(pConnection, pUserData);
+            })
+
+            // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
+            // updates to our value. These updates may have come from our own server or some other source.
+            //
+            // We can handle updates in any way we wish, but the most common use is to send a change notification.
+            .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
+            {
+                const char *tz = self.getDataPointer<const char *>("doptime/timezone", "");
+                self.sendChangeNotificationValue(pConnection, tz);
+                return true;
+            })
+
+            // GATT Descriptor: Characteristic User Description (0x2901)
+            //
+            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+            .gattDescriptorBegin("description", "2901", {"read"})
+
+                // Standard descriptor "ReadValue" method call
+                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+                {
+                    const char *pDescription = "String of a timezone in the IANA 2018e database the Doppler is using.";
+                    self.methodReturnValue(pInvocation, pDescription, true);
+                })
+
+            .gattDescriptorEnd()
+
+        .gattCharacteristicEnd()
+
+        // Characteristic: Use NTP time toggle (custom: 3e3be9b1b5b54d10846001585028deb5)
+        .gattCharacteristicBegin("ntp", "3e3be9b1b5b54d10846001585028deb5", {"read", "write"})
+
+            // Standard characteristic "ReadValue" method call
+            .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                const uint8_t ntp = self.getDataValue<const uint8_t>("doptime/ntp", 0);
+                self.methodReturnValue(pInvocation, ntp, true);
+            })
+
+            // Standard characteristic "WriteValue" method call
+            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+	            GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
+	            gsize size;
+	            gconstpointer pPtr = g_variant_get_fixed_array(const_cast<GVariant *>(pAyBuffer), &size, 1);
+	            // TODO: check size == 1
+                uint8_t ntp = *static_cast<const uint8_t *>(pPtr);
+
+                self.setDataValue("doptime/ntp", ntp);
+
+                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+                // Characteristic interface (which just so happens to be the same interface passed into our self
+                // parameter) we can that parameter to call our own onUpdatedValue method
+                self.callOnUpdatedValue(pConnection, &ntp);
+            })
+
+            // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
+            // updates to our value. These updates may have come from our own server or some other source.
+            //
+            // We can handle updates in any way we wish, but the most common use is to send a change notification.
+            .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
+            {
+	            const uint8_t ntp = self.getDataValue<const uint8_t>("doptime/ntp", 0);
+                self.sendChangeNotificationValue(pConnection, ntp);
+                return true;
+            })
+
+            // GATT Descriptor: Characteristic User Description (0x2901)
+            //
+            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+            .gattDescriptorBegin("description", "2901", {"read"})
+
+                // Standard descriptor "ReadValue" method call
+                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+                {
+                    const char *pDescription = "Toggle use of NTP time. 0 means NTP is not used, manually set time.";
+                    self.methodReturnValue(pInvocation, pDescription, true);
+                })
+
+            .gattDescriptorEnd()
+
+        .gattCharacteristicEnd()
+
 	.gattServiceEnd(); // << -- NOTE THE SEMICOLON
 
 	//  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -
