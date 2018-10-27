@@ -258,7 +258,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	dataSetter = setter;
 
 	// Adapter configuration flags - set these flags based on how you want the adapter configured
-	enableBREDR = false;
+	enableBREDR = true;
 	enableSecureConnection = false;
 	enableConnectable = true;
 	enableAdvertising = true;
@@ -368,7 +368,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	.gattServiceBegin("hardware", "8e7934bdf06d48f6860483c94e0ec8f9")
 
 		// Characteristic: R,G,B color values (custom: 57edcf379f674c64a9076efaa28e1712)
-		.gattCharacteristicBegin("displaycolor", "57edcf379f674c64a9076efaa28e1712", {"read", "write"})
+		.gattCharacteristicBegin("displaycolor", "57edcf379f674c64a9076efaa28e1712", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
 			// Standard characteristic "ReadValue" method call
 			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -606,13 +606,12 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
                 // Update the text string value to trigger the callback
-	            // HACK: put a dummy value on the data (should actually be a vector<uint8_t>
+	        // HACK: put a dummy value on the data (should actually be a vector<uint8_t>
                 self.setDataPointer("wifi/ssid_list", "");
-
-                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
-                // Characteristic interface (which just so happens to be the same interface passed into our self
-                // parameter) we can that parameter to call our own onUpdatedValue method
-                self.callOnUpdatedValue(pConnection, pUserData);
+                 
+                // normally you would call onUpdatedValue, but we are waiting for a process to complete
+                // in the background, so have that process call the update instead.
+                // self.callOnUpdatedValue(pConnection, pUserData);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -621,7 +620,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // We can handle updates in any way we wish, but the most common use is to send a change notification.
             .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
             {
-	            vector<guint8> val;
+	        vector<guint8> val;
                 val = self.getDataValue<const vector<guint8>>("wifi/ssid_list", val);
                 self.sendChangeNotificationValue(pConnection, val);
                 return true;

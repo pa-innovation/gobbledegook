@@ -277,7 +277,7 @@ void HciAdapter::runEventThread()
 
 						versionInformation = *reinterpret_cast<VersionInformation *>(data);
 						versionInformation.toHost();
-						Logger::debug(versionInformation.debugText());
+						Logger::info(versionInformation.debugText());
 						break;
 					}
 					case Mgmt::EReadControllerInformationCommand:
@@ -290,7 +290,7 @@ void HciAdapter::runEventThread()
 
 						controllerInformation = *reinterpret_cast<ControllerInformation *>(data);
 						controllerInformation.toHost();
-						Logger::debug(controllerInformation.debugText());
+						Logger::info(controllerInformation.debugText());
 						break;
 					}
 					case Mgmt::ESetLocalNameCommand:
@@ -322,7 +322,7 @@ void HciAdapter::runEventThread()
 						adapterSettings = *reinterpret_cast<AdapterSettings *>(data);
 						adapterSettings.toHost();
 
-						Logger::debug(adapterSettings.debugText());
+						Logger::info(adapterSettings.debugText());
 						break;
 					}
 				}
@@ -346,7 +346,7 @@ void HciAdapter::runEventThread()
 			{
 				DeviceConnectedEvent event(responsePacket);
 				activeConnections += 1;
-				Logger::debug(SSTR << "  > Connection count incremented to " << activeConnections);
+				Logger::info(SSTR << "  > Connection count incremented to " << activeConnections);
 				break;
 			}
 			// Command status event
@@ -356,11 +356,11 @@ void HciAdapter::runEventThread()
 				if (activeConnections > 0)
 				{
 					activeConnections -= 1;
-					Logger::debug(SSTR << "  > Connection count decremented to " << activeConnections);
+					Logger::info(SSTR << "  > Connection count decremented to " << activeConnections);
 				}
 				else
 				{
-					Logger::debug(SSTR << "  > Connection count already at zero, ignoring non-connected disconnect event");
+					Logger::info(SSTR << "  > Connection count already at zero, ignoring non-connected disconnect event");
 				}
 				break;
 			}
@@ -391,7 +391,7 @@ void HciAdapter::runEventThread()
 // milliseconds. Therefore, it is not recommended attempt to retrieve the results from their accessors immediately.
 void HciAdapter::sync(uint16_t controllerIndex)
 {
-	Logger::debug("Synchronizing version information");
+	Logger::info("Synchronizing version information");
 
 	HciAdapter::HciHeader request;
 	request.code = Mgmt::EReadVersionInformationCommand;
@@ -403,7 +403,7 @@ void HciAdapter::sync(uint16_t controllerIndex)
 		Logger::error("Failed to get version information");
 	}
 
-	Logger::debug("Synchronizing controller information");
+	Logger::info("Synchronizing controller information");
 
 	request.code = Mgmt::EReadControllerInformationCommand;
 	request.controllerId = controllerIndex;
@@ -537,7 +537,7 @@ bool HciAdapter::sendCommand(HciHeader &request)
 // Command responses are set via `setCommandResponse()`
 bool HciAdapter::waitForCommandResponse(uint16_t commandCode, int timeoutMS)
 {
-	Logger::debug(SSTR << "  + Waiting on command code " << commandCode << " for up to " << timeoutMS << "ms");
+	Logger::info(SSTR << "  + Waiting on command code " << commandCode << " for up to " << timeoutMS << "ms");
 
 	bool success = cvCommandResponse.wait_for(commandResponseLock, std::chrono::milliseconds(timeoutMS),
 		[&]
@@ -552,7 +552,7 @@ bool HciAdapter::waitForCommandResponse(uint16_t commandCode, int timeoutMS)
 	}
 	else
 	{
-		Logger::debug(SSTR << "  + Recieved the command code we were waiting for: " << Utils::hex(commandCode) << " (" << kCommandCodeNames[commandCode] << ")");
+		Logger::info(SSTR << "  + Recieved the command code we were waiting for: " << Utils::hex(commandCode) << " (" << kCommandCodeNames[commandCode] << ")");
 	}
 
 	return success;

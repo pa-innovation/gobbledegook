@@ -177,7 +177,7 @@ bool idleFunc(void *pUserData)
 		// Is it a characteristic?
 		if (std::shared_ptr<const GattCharacteristic> pCharacteristic = TRY_GET_CONST_INTERFACE_OF_TYPE(pInterface, GattCharacteristic))
 		{
-			Logger::debug(SSTR << "Processing updated value for interface '" << interfaceName << "' at path '" << objectPath << "'");
+			Logger::info(SSTR << "Processing updated value for interface '" << interfaceName << "' at path '" << objectPath << "'");
 			pCharacteristic->callOnUpdatedValue(pBusConnection, pUserData);
 			return true;
 		}
@@ -335,7 +335,7 @@ gboolean onPeriodicTimer(gpointer pUserData)
 	// Deal with retry timers
 	if (0 != retryTimeStart)
 	{
-		Logger::debug(SSTR << "Ticking retry timer");
+		Logger::info(SSTR << "Ticking retry timer");
 
 		// Has the retry time expired?
 		int secondsRemaining = time(nullptr) - retryTimeStart - kRetryDelaySeconds;
@@ -552,7 +552,7 @@ void doRegisterApplication()
 			else
 			{
 				g_variant_unref(pVariant);
-				Logger::debug(SSTR << "GATT application registered with BlueZ");
+				Logger::info(SSTR << "GATT application registered with BlueZ");
 				bApplicationRegistered = true;
 			}
 
@@ -648,7 +648,7 @@ void registerObjects()
 			return;
 		}
 
-		Logger::debug(SSTR << "Registering object hierarchy with D-Bus hierarchy");
+		Logger::info(SSTR << "Registering object hierarchy with D-Bus hierarchy");
 
 		// Register the node hierarchy
 		registerNodeHierarchy(pNode, DBusObjectPath(pNode->path));
@@ -689,10 +689,6 @@ void configureAdapter()
 	HciAdapter::ControllerInformation info = HciAdapter::getInstance().getControllerInformation();
 
 	// Are all of our settings the way we want them?
-
-        Logger::debug(SSTR << (info.currentSettings.isSet(HciAdapter::EHciBasicRate_EnhancedDataRate) ? "AdON":"AdOFF") << " AT STARTUP!");
-        Logger::debug(SSTR << (TheServer->getEnableBREDR() ? "AddON":"AddOFF") << " AT STARTUP!");
-
 	bool pwFlag = info.currentSettings.isSet(HciAdapter::EHciPowered) == true;
 	bool leFlag = info.currentSettings.isSet(HciAdapter::EHciLowEnergy) == true;
 	bool brFlag = info.currentSettings.isSet(HciAdapter::EHciBasicRate_EnhancedDataRate) == TheServer->getEnableBREDR();
@@ -708,14 +704,14 @@ void configureAdapter()
 		// We need it off to start with
 		if (pwFlag)
 		{
-			Logger::debug("Powering off");
+			Logger::info("Powering off");
 			if (!mgmt.setPowered(false)) { setRetry(); return; }
 		}
 
 		// Enable the LE state (we always set this state if it's not set)
 		if (!leFlag)
 		{
-			Logger::debug("Enabling LE");
+			Logger::info("Enabling LE");
 			if (!mgmt.setLE(true)) { setRetry(); return; }
 		}
 
@@ -724,35 +720,35 @@ void configureAdapter()
 		// Note that enabling this requries LE to already be enabled or this command will receive a 'rejected' result
 		if (!brFlag)
 		{
-			Logger::debug(SSTR << (TheServer->getEnableBREDR() ? "Enabling":"Disabling") << " BR/EDR");
+			Logger::info(SSTR << (TheServer->getEnableBREDR() ? "Enabling":"Disabling") << " BR/EDR");
 			if (!mgmt.setBredr(TheServer->getEnableBREDR())) { setRetry(); return; }
 		}
 
-		// Change the Secure Connectinos state?
+		// Change the Secure Connections state?
 		if (!scFlag)
 		{
-			Logger::debug(SSTR << (TheServer->getEnableSecureConnection() ? "Enabling":"Disabling") << " Secure Connections");
-			if (!mgmt.setSecureConnections(TheServer->getEnableSecureConnection() ? 1 : 0)) { setRetry(); return; }
+			Logger::info(SSTR << (TheServer->getEnableSecureConnection() ? "Forcing":"Disabling") << " Secure Connections");
+			if (!mgmt.setSecureConnections(TheServer->getEnableSecureConnection() ? 2 : 0)) { setRetry(); return; }
 		}
 
 		// Change the Bondable state?
 		if (!bnFlag)
 		{
-			Logger::debug(SSTR << (TheServer->getEnableBondable() ? "Enabling":"Disabling") << " Bondable");
+			Logger::info(SSTR << (TheServer->getEnableBondable() ? "Enabling":"Disabling") << " Bondable");
 			if (!mgmt.setBondable(TheServer->getEnableBondable())) { setRetry(); return; }
 		}
 
 		// Change the Connectable state?
 		if (!cnFlag)
 		{
-			Logger::debug(SSTR << (TheServer->getEnableConnectable() ? "Enabling":"Disabling") << " Connectable");
+			Logger::info(SSTR << (TheServer->getEnableConnectable() ? "Enabling":"Disabling") << " Connectable");
 			if (!mgmt.setConnectable(TheServer->getEnableConnectable())) { setRetry(); return; }
 		}
 
 		// Change the Advertising state?
 		if (!adFlag)
 		{
-			Logger::debug(SSTR << (TheServer->getEnableAdvertising() ? "Enabling":"Disabling") << " Advertising");
+			Logger::info(SSTR << (TheServer->getEnableAdvertising() ? "Enabling":"Disabling") << " Advertising");
 			if (!mgmt.setAdvertising(TheServer->getEnableAdvertising() ? 1 : 0)) { setRetry(); return; }
 		}
 
@@ -764,7 +760,7 @@ void configureAdapter()
 		}
 
 		// Turn it back on
-		Logger::debug("Powering on");
+		Logger::info("Powering on");
 		if (!mgmt.setPowered(true)) { setRetry(); return; }
 	}
 
@@ -1054,7 +1050,7 @@ void initializationStateProcessor()
 	//
 	if (nullptr == pBusConnection)
 	{
-		Logger::debug(SSTR << "Acquiring bus connection");
+		Logger::info(SSTR << "Acquiring bus connection");
 		doBusAcquire();
 		return;
 	}
@@ -1064,7 +1060,7 @@ void initializationStateProcessor()
 	//
 	if (!bOwnedNameAcquired)
 	{
-		Logger::debug(SSTR << "Acquiring owned name: '" << TheServer->getOwnedName() << "'");
+		Logger::info(SSTR << "Acquiring owned name: '" << TheServer->getOwnedName() << "'");
 		doOwnedNameAcquire();
 		return;
 	}
@@ -1074,7 +1070,7 @@ void initializationStateProcessor()
 	//
 	if (nullptr == pBluezObjectManager)
 	{
-		Logger::debug(SSTR << "Getting BlueZ ObjectManager");
+		Logger::info(SSTR << "Getting BlueZ ObjectManager");
 		getBluezObjectManager();
 		return;
 	}
@@ -1084,7 +1080,7 @@ void initializationStateProcessor()
 	//
 	if (bluezGattManagerInterfaceName.empty())
 	{
-		Logger::debug(SSTR << "Finding BlueZ GattManager1 interface");
+		Logger::info(SSTR << "Finding BlueZ GattManager1 interface");
 		findAdapterInterface();
 		return;
 	}
@@ -1094,7 +1090,7 @@ void initializationStateProcessor()
 	//
 	if (!bAdapterConfigured)
 	{
-		Logger::debug(SSTR << "Configuring BlueZ adapter '" << bluezGattManagerInterfaceName << "'");
+		Logger::info(SSTR << "Configuring BlueZ adapter '" << bluezGattManagerInterfaceName << "'");
 		configureAdapter();
 		return;
 	}
@@ -1104,7 +1100,7 @@ void initializationStateProcessor()
 	//
 	if (registeredObjectIds.empty())
 	{
-		Logger::debug(SSTR << "Registering with D-Bus");
+		Logger::info(SSTR << "Registering with D-Bus");
 		registerObjects();
 		return;
 	}
@@ -1112,7 +1108,7 @@ void initializationStateProcessor()
 	// Register our appliation with the BlueZ GATT manager
 	if (!bApplicationRegistered)
 	{
-		Logger::debug(SSTR << "Registering application with BlueZ GATT manager");
+		Logger::info(SSTR << "Registering application with BlueZ GATT manager");
 
 		doRegisterApplication();
 		return;
@@ -1161,7 +1157,7 @@ void runServerThread()
 	// There are alternatives, but using async methods is the recommended way.
 	initializationStateProcessor();
 
-	Logger::debug(SSTR << "Creating GLib main loop");
+	Logger::info(SSTR << "Creating GLib main loop");
 	pMainLoop = g_main_loop_new(NULL, FALSE);
 
 	// Add the idle function

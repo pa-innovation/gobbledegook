@@ -142,7 +142,7 @@ public:
 			toHost();
 
 			// Log it
-			Logger::debug(debugText());
+			Logger::info(debugText());
 		}
 
 		void toNetwork()
@@ -182,7 +182,7 @@ public:
 			toHost();
 
 			// Log it
-			Logger::debug(debugText());
+			Logger::info(debugText());
 		}
 
 		void toNetwork()
@@ -224,7 +224,7 @@ public:
 			toHost();
 
 			// Log it
-			Logger::debug(debugText());
+			Logger::info(debugText());
 		}
 
 		void toNetwork()
@@ -274,7 +274,7 @@ public:
 			toHost();
 
 			// Log it
-			Logger::debug(debugText());
+			Logger::info(debugText());
 		}
 
 		void toNetwork()

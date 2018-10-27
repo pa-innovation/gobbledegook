@@ -92,7 +92,7 @@ bool HciSocket::connect()
 		return false;
 	}
 
-	Logger::debug(SSTR << "Connected to HCI control socket (fd = " << fdSocket << ")");
+	Logger::info(SSTR << "Connected to HCI control socket (fd = " << fdSocket << ")");
 
 	return true;
 }
@@ -108,7 +108,7 @@ void HciSocket::disconnect()
 {
 	if (isConnected())
 	{
-		Logger::debug("HciSocket disconnecting");
+		Logger::info("HciSocket disconnecting");
 
 		if (close(fdSocket) != 0)
 		{
@@ -145,7 +145,7 @@ bool HciSocket::read(std::vector<uint8_t> &response) const
 	{
 		if (errno == EINTR)
 		{
-			Logger::debug("HciSocket receive interrupted");
+			Logger::info("HciSocket receive interrupted");
 		}
 		else
 		{
@@ -167,7 +167,7 @@ bool HciSocket::read(std::vector<uint8_t> &response) const
 	std::string dump = "";
 	dump += "  > Read " + std::to_string(response.size()) + " bytes\n";
 	dump += Utils::hex(response.data(), response.size());
-	Logger::debug(dump);
+	Logger::info(dump);
 
 	return true;
 }
@@ -188,7 +188,7 @@ bool HciSocket::write(const uint8_t *pBuffer, size_t count) const
 	std::string dump = "";
 	dump += "  > Writing " + std::to_string(count) + " bytes\n";
 	dump += Utils::hex(pBuffer, count);
-	Logger::debug(dump);
+	Logger::info(dump);
 
 	size_t len = ::write(fdSocket, pBuffer, count);
 
