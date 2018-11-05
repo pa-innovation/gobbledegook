@@ -27,7 +27,7 @@
 // >>>  DISCUSSION
 // >>
 //
-// Not sure what a D-Bus Interface is? Well, chedk the Readme for resources, but here's the TL;DR:
+// Not sure what a D-Bus Interface is? Well, check the Readme for resources, but here's the TL;DR:
 //
 // A D-Bus interface is a contract (similar to programming language interfaces.) An interface defines a set of methods and
 // properties for others to use.

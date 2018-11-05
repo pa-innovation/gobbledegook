@@ -368,7 +368,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	.gattServiceBegin("hardware", "8e7934bdf06d48f6860483c94e0ec8f9")
 
 		// Characteristic: R,G,B color values (custom: 57edcf379f674c64a9076efaa28e1712)
-		.gattCharacteristicBegin("displaycolor", "57edcf379f674c64a9076efaa28e1712", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
+		.gattCharacteristicBegin("displaycolor", "57edcf379f674c64a9076efaa28e1712", {"read", "write"})
 
 			// Standard characteristic "ReadValue" method call
 			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA

@@ -727,8 +727,8 @@ void configureAdapter()
 		// Change the Secure Connections state?
 		if (!scFlag)
 		{
-			Logger::info(SSTR << (TheServer->getEnableSecureConnection() ? "Forcing":"Disabling") << " Secure Connections");
-			if (!mgmt.setSecureConnections(TheServer->getEnableSecureConnection() ? 2 : 0)) { setRetry(); return; }
+			Logger::info(SSTR << (TheServer->getEnableSecureConnection() ? "Enabling":"Disabling") << " Secure Connections");
+			if (!mgmt.setSecureConnections(TheServer->getEnableSecureConnection() ? 1 : 0)) { setRetry(); return; }
 		}
 
 		// Change the Bondable state?
