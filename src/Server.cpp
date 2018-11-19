@@ -933,6 +933,38 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 
         .gattCharacteristicEnd()
 
+        // Characteristic: Play a Test Sound (custom: e4c042eabbb84547bcc7ea79cc8940bb)
+        .gattCharacteristicBegin("test_sound", "e4c042eabbb84547bcc7ea79cc8940bb", {"write"})
+
+            // Standard characteristic "WriteValue" method call
+            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                // Update the text string value
+                GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
+                self.setDataPointer("alarm/test_sound", Utils::stringFromGVariantByteArray(pAyBuffer).c_str());
+
+                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+                // Characteristic interface (which just so happens to be the same interface passed into our self
+                // parameter) we can that parameter to call our own onUpdatedValue method
+                self.callOnUpdatedValue(pConnection, pUserData);
+            })
+
+            // GATT Descriptor: Characteristic User Description (0x2901)
+            //
+            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+            .gattDescriptorBegin("description", "2901", {"read"})
+
+                // Standard descriptor "ReadValue" method call
+                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+                {
+                    const char *pDescription = "Write an utf-8 string of a test sound to play";
+                    self.methodReturnValue(pInvocation, pDescription, true);
+                })
+
+            .gattDescriptorEnd()
+
+        .gattCharacteristicEnd()
+
     .gattServiceEnd()
 
     // Service: Doppler Software (custom: e0339a93c7694f8fb39d8bc94feb183c)
