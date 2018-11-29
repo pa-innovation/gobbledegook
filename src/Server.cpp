@@ -544,8 +544,8 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
-                const uint8_t brightness = self.getDataValue<const uint8_t>("hardware/volume", 0);
-                self.methodReturnValue(pInvocation, brightness, true);
+                const uint8_t vol = self.getDataValue<const uint8_t>("hardware/volume", 0);
+                self.methodReturnValue(pInvocation, vol, true);
             })
 
             // Standard characteristic "WriteValue" method call
@@ -765,8 +765,8 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
-                const uint32_t HACK_CRC = 0x12345678;
-                self.methodReturnValue(pInvocation, HACK_CRC, true);
+                const uint32_t crc = self.getDataValue<const uint32_t>("alarm/crc", 0);
+                self.methodReturnValue(pInvocation, crc, true);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -775,8 +775,8 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // We can handle updates in any way we wish, but the most common use is to send a change notification.
             .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
             {
-	            const uint32_t HACK_CRC = 0x12345678;
-                self.sendChangeNotificationValue(pConnection, HACK_CRC);
+                const uint32_t crc = self.getDataValue<const uint32_t>("alarm/crc", 0);
+                self.sendChangeNotificationValue(pConnection, crc);
                 return true;
             })
 
