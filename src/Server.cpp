@@ -537,6 +537,60 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 
         .gattCharacteristicEnd()
 
+        // Characteristic: Auto-Brightness toggle (custom: 25d2042ee4a24aa880bf949ce65cd7c0)
+        .gattCharacteristicBegin("autobright", "25d2042ee4a24aa880bf949ce65cd7c0", {"read", "write"})
+
+            // Standard characteristic "ReadValue" method call
+            .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                const uint8_t abright = self.getDataValue<const uint8_t>("hardware/autobright", 0);
+                self.methodReturnValue(pInvocation, abright, true);
+            })
+
+            // Standard characteristic "WriteValue" method call
+            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+	            GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
+	            gsize size;
+	            gconstpointer pPtr = g_variant_get_fixed_array(const_cast<GVariant *>(pAyBuffer), &size, 1);
+	            // TODO: check size == 1
+                uint8_t abright = *static_cast<const uint8_t *>(pPtr);
+
+                self.setDataValue("hardware/autobright", abright);
+
+                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+                // Characteristic interface (which just so happens to be the same interface passed into our self
+                // parameter) we can that parameter to call our own onUpdatedValue method
+                self.callOnUpdatedValue(pConnection, &abright);
+            })
+
+            // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
+            // updates to our value. These updates may have come from our own server or some other source.
+            //
+            // We can handle updates in any way we wish, but the most common use is to send a change notification.
+            .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
+            {
+	        const uint8_t abright = self.getDataValue<const uint8_t>("hardware/autobright", 0);
+                self.sendChangeNotificationValue(pConnection, abright);
+                return true;
+            })
+
+            // GATT Descriptor: Characteristic User Description (0x2901)
+            //
+            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+            .gattDescriptorBegin("description", "2901", {"read"})
+
+                // Standard descriptor "ReadValue" method call
+                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+                {
+                    const char *pDescription = "Toggle the ability for automatic brightness";
+                    self.methodReturnValue(pInvocation, pDescription, true);
+                })
+
+            .gattDescriptorEnd()
+
+        .gattCharacteristicEnd()
+
 
         // Characteristic: Volume percent (custom: 5f00e8c711b34e66962d96ef45aae66c)
         .gattCharacteristicBegin("volume", "5f00e8c711b34e66962d96ef45aae66c", {"read", "write"})
