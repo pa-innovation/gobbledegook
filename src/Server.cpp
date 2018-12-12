@@ -1527,7 +1527,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Challenge (custom: 0x9c2ba4af872249b19b2deec923ace9c8)
-        .gattCharacteristicBegin("challenge", "9c2ba4af872249b19b2deec923ace9c8", {"read"})
+        .gattCharacteristicBegin("challenge", "9c2ba4af872249b19b2deec923ace9c8", {"read","notify"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1572,22 +1572,8 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
                 self.setDataPointer("alexa/key", Utils::stringFromGVariantByteArray(pAyBuffer).c_str());
 
-                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
-                // Characteristic interface (which just so happens to be the same interface passed into our self
-                // parameter) we can that parameter to call our own onUpdatedValue method
-                self.callOnUpdatedValue(pConnection, pUserData);
             })
 
-            // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
-            // updates to our value. These updates may have come from our own server or some other source.
-            //
-            // We can handle updates in any way we wish, but the most common use is to send a change notification.
-            .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
-            {
-                const char *key = self.getDataPointer<const char *>("alexa/key", "");
-                self.sendChangeNotificationValue(pConnection, key);
-                return true;
-            })
 
             // GATT Descriptor: Characteristic User Description (0x2901)
             //
