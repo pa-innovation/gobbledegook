@@ -699,11 +699,12 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         // Characteristic: Wifi Status (custom: 6fcbf07c93f34fef866a7d9c8926596a)
         .gattCharacteristicBegin("wifi_status", "6fcbf07c93f34fef866a7d9c8926596a", {"read","notify"})
 
+
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
-                const char HACK_STATUS[4] = {0x1,'F','o','o'};
-                self.methodReturnValue(pInvocation, HACK_STATUS, true);
+                const char *status = self.getDataPointer<const char *>("wifi/wifi_status", "");
+                self.methodReturnValue(pInvocation, status, true);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -712,10 +713,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // We can handle updates in any way we wish, but the most common use is to send a change notification.
             .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
             {
-	            const char HACK_STATUS[4] = {0x1,'F','o','o'};
-                self.sendChangeNotificationValue(pConnection, HACK_STATUS);
+                const char *status = self.getDataPointer<const char *>("wifi/wifi_status", "");
+                self.sendChangeNotificationValue(pConnection, status);
                 return true;
             })
+
 
             // GATT Descriptor: Characteristic User Description (0x2901)
             //
