@@ -94,6 +94,7 @@
 //             {
 //                 // Abbreviated for simplicity
 //                 myTextString = ...
+//                 self.methodReturnVariant(pInvocation, NULL);
 //             })
 //
 //             .gattDescriptorBegin("description", "2901", {"read"})
@@ -460,6 +461,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -515,6 +521,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &brightness);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -569,6 +580,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &abright);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -623,6 +639,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &vol);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -673,6 +694,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // normally you would call onUpdatedValue, but we are waiting for a process to complete
                 // in the background, so have that process call the update instead.
                 // self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -756,6 +782,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // GATT Descriptor: Characteristic User Description (0x2901)
@@ -792,6 +823,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -873,6 +909,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // GATT Descriptor: Characteristic User Description (0x2901)
@@ -909,6 +950,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &alarm_id);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // GATT Descriptor: Characteristic User Description (0x2901)
@@ -941,6 +987,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // GATT Descriptor: Characteristic User Description (0x2901)
@@ -1010,6 +1061,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // GATT Descriptor: Characteristic User Description (0x2901)
@@ -1060,6 +1116,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &mode);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1147,6 +1208,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &dotw);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1199,6 +1265,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &weather);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1251,6 +1322,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &temp);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1300,6 +1376,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1350,6 +1431,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1400,6 +1486,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1450,6 +1541,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1507,6 +1603,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &isSet);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1581,6 +1682,10 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
                 self.setDataPointer("alexa/key", Utils::stringFromGVariantByteArray(pAyBuffer).c_str());
 
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
 
@@ -1637,6 +1742,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
 			})
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1692,6 +1802,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &offset);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1743,6 +1858,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1797,6 +1917,11 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
                 self.callOnUpdatedValue(pConnection, &ntp);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
