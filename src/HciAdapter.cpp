@@ -427,6 +427,7 @@ bool HciAdapter::start()
 	// If the thread is already running, return failure
 	if (eventThread.joinable())
 	{
+	    Logger::warn(SSTR << "HciAdapter already on eventThread (double start() call?)");
 		return false;
 	}
 

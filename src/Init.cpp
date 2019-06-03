@@ -199,9 +199,6 @@ bool idleFunc(void *pUserData)
 // Perform final cleanup of various resources that were allocated while the server was initialized and/or running
 void uninit()
 {
-  	// We've left our main loop - nullify its pointer so we know we're no longer running
-  	pMainLoop = nullptr;
-
 	if (nullptr != pBluezAdapterObject)
 	{
 		g_object_unref(pBluezAdapterObject);
@@ -270,6 +267,7 @@ void uninit()
 		pBusConnection = nullptr;
 	}
 
+	// We've left our main loop - nullify its pointer so we know we're no longer running
 	if (nullptr != pMainLoop)
 	{
 		g_main_loop_unref(pMainLoop);

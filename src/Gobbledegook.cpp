@@ -500,6 +500,9 @@ int ggkStart(const std::map<const std::string, const std::string> &dataMap,
 		// Start our server thread
 		try
 		{
+		    // set server state to uninitialized in this thread before moving to serverThread
+		    setServerRunState(EUninitialized);
+		    // server state should now be handled by serverThread
 			serverThread = std::thread(runServerThread);
 		}
 		catch(std::system_error &ex)
@@ -531,6 +534,7 @@ int ggkStart(const std::map<const std::string, const std::string> &dataMap,
 		// If something went wrong, shut down if we've not already done so
 		if (ggkGetServerRunState() != ERunning)
 		{
+		    Logger::error(SSTR << "Something went wrong and server is not starting");
 			if (!ggkWait())
 			{
 				Logger::warn(SSTR << "Unable to stop the server after an error in ggkStart()");
