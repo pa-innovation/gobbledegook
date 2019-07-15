@@ -736,8 +736,9 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
-                const char *status = self.getDataPointer<const char *>("wifi/wifi_status", "");
-                self.methodReturnValue(pInvocation, status, true);
+                vector<guint8> val;
+                val = self.getDataValue<const vector<guint8>>("wifi/wifi_status", val);
+                self.methodReturnValue(pInvocation, val, true);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -746,8 +747,9 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // We can handle updates in any way we wish, but the most common use is to send a change notification.
             .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
             {
-                const char *status = self.getDataPointer<const char *>("wifi/wifi_status", "");
-                self.sendChangeNotificationValue(pConnection, status);
+                vector<guint8> val;
+                val = self.getDataValue<const vector<guint8>>("wifi/wifi_status", val);
+                self.sendChangeNotificationValue(pConnection, val);
                 return true;
             })
 
