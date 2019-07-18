@@ -1156,8 +1156,8 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
-	            const uint32_t HACK_STATUS = 0x12340000;
-                self.methodReturnValue(pInvocation, HACK_STATUS, true);
+	        const uint32_t status = self.getDataValue<const uint32_t>("software/status", 0);
+                self.methodReturnValue(pInvocation, status, true);
             })
 
             // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
@@ -1166,8 +1166,8 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // We can handle updates in any way we wish, but the most common use is to send a change notification.
             .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
             {
-	            const uint32_t HACK_STATUS = 0x12340000;
-                self.sendChangeNotificationValue(pConnection, HACK_STATUS);
+                const uint32_t status = self.getDataValue<const uint32_t>("software/status", 0);
+                self.sendChangeNotificationValue(pConnection, status);
                 return true;
             })
 
