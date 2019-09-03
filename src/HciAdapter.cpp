@@ -341,7 +341,7 @@ void HciAdapter::runEventThread()
 				setCommandResponse(event.commandCode);
 				break;
 			}
-			// Command status event
+			// Device connected event
 			case Mgmt::EDeviceConnectedEvent:
 			{
 				DeviceConnectedEvent event(responsePacket);
@@ -349,7 +349,7 @@ void HciAdapter::runEventThread()
 				Logger::info(SSTR << "  > Connection count incremented to " << activeConnections);
 				break;
 			}
-			// Command status event
+			// Device disconnected event
 			case Mgmt::EDeviceDisconnectedEvent:
 			{
 				DeviceDisconnectedEvent event(responsePacket);
@@ -363,6 +363,13 @@ void HciAdapter::runEventThread()
 					Logger::info(SSTR << "  > Connection count already at zero, ignoring non-connected disconnect event");
 				}
 				break;
+			}
+			// Class of Device Changed event
+			case Mgmt::EClassOfDeviceChangedEvent:
+			{
+			    ClassOfDeviceChangedEvent event(responsePacket);
+			    // Just logging that we changed our Class of Device (during event construction)
+			    break;
 			}
 			// Unsupported
 			default:
