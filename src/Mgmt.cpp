@@ -184,6 +184,22 @@ bool Mgmt::setLE(bool newState)
 	return setState(Mgmt::ESetLowEnergyCommand, controllerIndex, newState ? 1 : 0);
 }
 
+// Set the LE state to `newState` (true = enabled, false = disabled)
+//
+// Returns true on success, otherwise false
+bool Mgmt::setSSP(bool newState)
+{
+    return setState(Mgmt::ESetSecureSimplePairingCommand, controllerIndex, newState ? 1 : 0);
+}
+
+// Set the LE state to `newState` (true = enabled, false = disabled)
+//
+// Returns true on success, otherwise false
+bool Mgmt::setHC(bool newState)
+{
+    return setState(Mgmt::ESetHighSpeedCommand, controllerIndex, newState ? 1 : 0);
+}
+
 // Set the advertising state to `newState` (0 = disabled, 1 = enabled (with consideration towards the connectable setting),
 // 2 = enabled in connectable mode).
 //

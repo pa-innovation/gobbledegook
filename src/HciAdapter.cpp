@@ -361,6 +361,36 @@ void HciAdapter::runEventThread()
 			    // Just logging that we changed our Class of Device (during event construction)
 			    break;
 			}
+			case Mgmt::ENewLinkKeyEvent:
+			{
+			    NewLinkKeyEvent event(responsePacket);
+			    break;
+			}
+			case Mgmt::ENewIdentityResolvingKeyEvent:
+            {
+                NewIdenityResolvingKeyEvent event(responsePacket);
+                break;
+            }
+			case Mgmt::ENewSignatureResolvingKeyEvent:
+            {
+                NewSignatureResolvingKeyEvent event(responsePacket);
+                break;
+            }
+			case Mgmt::ENewLongTermKeyEvent:
+            {
+                NewLongTermKeyEvent event(responsePacket);
+                break;
+            }
+			case Mgmt::EPasskeyNotifyEvent:
+			{
+			    PasskeyNotifyEvent event(responsePacket);
+			    break;
+		    }
+			case Mgmt::EUserConfirmationRequestEvent:
+			{
+			    UserConfirmationRequestEvent event(responsePacket);
+			    break;
+		    }
 			// Unsupported
 			default:
 			{

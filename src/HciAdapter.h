@@ -30,6 +30,8 @@
 #include <mutex>
 #include <condition_variable>
 
+#include <iomanip>
+
 #include "HciSocket.h"
 #include "Utils.h"
 #include "Logger.h"
@@ -502,6 +504,401 @@ public:
             return text;
         }
     } __attribute__((packed));
+
+    struct NewLinkKeyEvent {
+            HciHeader header;
+            uint8_t store_hint;
+            uint8_t key_address[6];
+            uint8_t key_addressType;
+            uint8_t key_type;
+            uint8_t key_data[16];
+            uint8_t key_pinLength;
+
+            NewLinkKeyEvent(const std::vector<uint8_t> &data) {
+                *this = *reinterpret_cast<const NewLinkKeyEvent *>(data.data());
+                toHost();
+
+                // Log it
+                Logger::info(debugText());
+            }
+
+            void toNetwork() {
+                header.toNetwork();
+            }
+
+            void toHost() {
+                header.toHost();
+            }
+
+            std::string debugText() {
+                std::string text = "";
+                std::string addieType;
+                std::string keyTypeString;
+                switch( key_addressType ) {
+                    case 0x00:
+                        addieType = "BR/EDR";
+                        break;
+                    case 0x01:
+                        addieType = "Reserved (not in use)";
+                        break;
+                    case 0x02:
+                        addieType = "Reserved (not in use)";
+                        break;
+                    default:
+                        addieType = "Unsupported value";
+                }
+                switch(key_type) {
+                case 0x00:
+                    keyTypeString = "Combination key"; break;
+                case 0x01:
+                    keyTypeString = "Local Unit key"; break;
+                case 0x02:
+                    keyTypeString = "Remote Unit key"; break;
+                case 0x03:
+                    keyTypeString = "Debug Combination key"; break;
+                case 0x04:
+                    keyTypeString = "Unauthenticated Combination key from P-192"; break;
+                case 0x05:
+                    keyTypeString = "Authenticated Combination key from P-192"; break;
+                case 0x06:
+                    keyTypeString = "Changed Combination key"; break;
+                case 0x07:
+                    keyTypeString = "Unauthenticated Combination key from P-256"; break;
+                case 0x08:
+                    keyTypeString = "Authenticated Combination key from P-256"; break;
+                default:
+                    keyTypeString = "Unsupported value";
+                }
+                text += "> New Link Key event\n";
+                text += "  + Event code         : " + Utils::hex(header.code) + " ("
+                        + HciAdapter::kEventTypeNames[header.code] + ")\n";
+                text += "  + Controller Id      : " + Utils::hex(header.controllerId) + "\n";
+                text += "  + Data size          : " + std::to_string(header.dataSize) + " bytes\n";
+                text += "  + Store Hint         : " + Utils::hex(store_hint) + "\n";
+                text += "  - Key                :\n";
+                text += "    + Address          : " + Utils::bluetoothAddressString(key_address) + "\n";
+                text += "    + Address type     : " + addieType + "\n";
+                text += "    + Type             : " + keyTypeString + "\n";
+                text += "    + Data             : " + Utils::hex(key_data, 16) + "\n";
+                text += "    + Pin Length       : " + Utils::hex(key_pinLength) + "\n";
+                return text;
+            }
+        }__attribute__((packed));
+
+    struct PasskeyNotifyEvent {
+            HciHeader header;
+            uint8_t address[6];
+            uint8_t addressType;
+            uint32_t passkey;
+            uint8_t entered;
+
+            PasskeyNotifyEvent(const std::vector<uint8_t> &data) {
+                *this = *reinterpret_cast<const PasskeyNotifyEvent *>(data.data());
+                toHost();
+
+                // Log it
+                Logger::info(debugText());
+            }
+
+            void toNetwork() {
+                header.toNetwork();
+                passkey = Utils::endianToHci(passkey);
+            }
+
+            void toHost() {
+                header.toHost();
+                passkey = Utils::endianToHost(passkey);
+            }
+
+            std::string debugText() {
+                std::string text = "";
+                std::string addieType;
+                std::ostringstream ss;
+                ss << std::setw( 6 ) << std::setfill( '0' ) << passkey;
+                std::string passkeyString = ss.str();
+                switch( addressType ) {
+                    case 0x00:
+                        addieType = "BR/EDR";
+                        break;
+                    case 0x01:
+                        addieType = "LE Public";
+                        break;
+                    case 0x02:
+                        addieType = "LE Random";
+                        break;
+                    default:
+                        addieType = "Unsupported value";
+                }
+                text += "> New Passkey Notify event\n";
+                text += "  + Event code         : " + Utils::hex(header.code) + " ("
+                        + HciAdapter::kEventTypeNames[header.code] + ")\n";
+                text += "  + Controller Id      : " + Utils::hex(header.controllerId) + "\n";
+                text += "  + Data size          : " + std::to_string(header.dataSize) + " bytes\n";
+                text += "  + Address            : " + Utils::bluetoothAddressString(address) + "\n";
+                text += "  + Address type       : " + addieType + "\n";
+                text += "  + Key                : " + passkeyString + "\n";
+                text += "  + Digits Entered     : " + std::to_string(entered) + "\n";
+                return text;
+            }
+        }__attribute__((packed));
+
+    struct UserConfirmationRequestEvent {
+        HciHeader header;
+        uint8_t address[6];
+        uint8_t addressType;
+        uint8_t confirm_hint;
+        uint32_t passkey;
+
+        UserConfirmationRequestEvent(const std::vector<uint8_t> &data) {
+            *this = *reinterpret_cast<const UserConfirmationRequestEvent *>(data.data());
+            toHost();
+
+            // Log it
+            Logger::info(debugText());
+        }
+
+        void toNetwork() {
+            header.toNetwork();
+            passkey = Utils::endianToHci(passkey);
+        }
+
+        void toHost() {
+            header.toHost();
+            passkey = Utils::endianToHost(passkey);
+        }
+
+        std::string debugText() {
+            std::string text = "";
+            std::string addieType;
+            std::ostringstream ss;
+            ss << std::setw( 6 ) << std::setfill( '0' ) << passkey;
+            std::string passkeyString = ss.str();
+            switch( addressType ) {
+                case 0x00:
+                    addieType = "BR/EDR";
+                    break;
+                case 0x01:
+                    addieType = "LE Public";
+                    break;
+                case 0x02:
+                    addieType = "LE Random";
+                    break;
+                default:
+                    addieType = "Unsupported value";
+            }
+            text += "> New User Confirmation Request event\n";
+            text += "  + Event code         : " + Utils::hex(header.code) + " ("
+                    + HciAdapter::kEventTypeNames[header.code] + ")\n";
+            text += "  + Controller Id      : " + Utils::hex(header.controllerId) + "\n";
+            text += "  + Data size          : " + std::to_string(header.dataSize) + " bytes\n";
+            text += "  + Address            : " + Utils::bluetoothAddressString(address) + "\n";
+            text += "  + Address type       : " + addieType + "\n";
+            text += "  + Confirm Hint       : " + Utils::hex(confirm_hint) + "\n";
+            text += "  + Key                : " + passkeyString + "\n";
+            return text;
+        }
+    }__attribute__((packed));
+
+    struct NewIdenityResolvingKeyEvent {
+        HciHeader header;
+        uint8_t store_hint;
+        uint8_t random_address[6];
+        uint8_t key_address[6];
+        uint8_t key_addressType;
+        uint8_t key_data[16];
+
+        NewIdenityResolvingKeyEvent(const std::vector<uint8_t> &data) {
+            *this = *reinterpret_cast<const NewIdenityResolvingKeyEvent *>(data.data());
+            toHost();
+
+            // Log it
+            Logger::info(debugText());
+        }
+
+        void toNetwork() {
+            header.toNetwork();
+        }
+
+        void toHost() {
+            header.toHost();
+        }
+
+        std::string debugText() {
+            std::string text = "";
+            std::string addieType;
+            switch( key_addressType ) {
+                case 0x00:
+                    addieType = "BR/EDR";
+                    break;
+                case 0x01:
+                    addieType = "LE Public";
+                    break;
+                case 0x02:
+                    addieType = "LE Random";
+                    break;
+                default:
+                    addieType = "Unsupported value";
+            }
+            text += "> New Identity Resolving Key event\n";
+            text += "  + Event code         : " + Utils::hex(header.code) + " ("
+                    + HciAdapter::kEventTypeNames[header.code] + ")\n";
+            text += "  + Controller Id      : " + Utils::hex(header.controllerId) + "\n";
+            text += "  + Data size          : " + std::to_string(header.dataSize) + " bytes\n";
+            text += "  + Store Hint         : " + Utils::hex(store_hint) + "\n";
+            text += "  + Random Address     : " + Utils::bluetoothAddressString(random_address) + "\n";
+            text += "  - Key                :\n";
+            text += "    + Address          : " + Utils::bluetoothAddressString(key_address) + "\n";
+            text += "    + Address type     : " + addieType + "\n";
+            text += "    + Data             : " + Utils::hex(key_data, 16) + "\n";
+            return text;
+        }
+    }__attribute__((packed));
+
+    struct NewSignatureResolvingKeyEvent {
+        HciHeader header;
+        uint8_t store_hint;
+        uint8_t key_address[6];
+        uint8_t key_addressType;
+        uint8_t key_type;
+        uint8_t key_data[16];
+
+        NewSignatureResolvingKeyEvent(const std::vector<uint8_t> &data) {
+            *this = *reinterpret_cast<const NewSignatureResolvingKeyEvent *>(data.data());
+            toHost();
+
+            // Log it
+            Logger::info(debugText());
+        }
+
+        void toNetwork() {
+            header.toNetwork();
+        }
+
+        void toHost() {
+            header.toHost();
+        }
+
+        std::string debugText() {
+            std::string text = "";
+            std::string addieType;
+            std::string keyTypeString;
+            switch(key_addressType) {
+            case 0x00:
+                addieType = "BR/EDR"; break;
+            case 0x01:
+                addieType = "LE Public"; break;
+            case 0x02:
+                addieType = "LE Random"; break;
+            default:
+                addieType = "Unsupported value";
+            }
+            switch(key_type) {
+            case 0x00:
+                keyTypeString = "Unauthenticated local CSRK"; break;
+            case 0x01:
+                keyTypeString = "Unauthenticated remote CSRK"; break;
+            case 0x02:
+                keyTypeString = "Authenticated local CSRK"; break;
+            case 0x03:
+                keyTypeString = "Authenticated remote CSRK"; break;
+            default:
+                keyTypeString = "Unsupported value";
+            }
+            text += "> New Signature Resolving Key event\n";
+            text += "  + Event code         : " + Utils::hex(header.code) + " ("
+                    + HciAdapter::kEventTypeNames[header.code] + ")\n";
+            text += "  + Controller Id      : " + Utils::hex(header.controllerId) + "\n";
+            text += "  + Data size          : " + std::to_string(header.dataSize) + " bytes\n";
+            text += "  + Store Hint         : " + Utils::hex(store_hint) + "\n";
+            text += "  - Key                :\n";
+            text += "    + Address          : " + Utils::bluetoothAddressString(key_address) + "\n";
+            text += "    + Address type     : " + addieType + "\n";
+            text += "    + Type             : " + keyTypeString + "\n";
+            text += "    + Data             : " + Utils::hex(key_data, 16) + "\n";
+            return text;
+        }
+    }__attribute__((packed));
+
+    struct NewLongTermKeyEvent {
+        HciHeader header;
+        uint8_t store_hint;
+        uint8_t key_address[6];
+        uint8_t key_addressType;
+        uint8_t key_type;
+        uint8_t key_master;
+        uint8_t key_encryptionSize;
+        uint16_t key_encryptedDiversifier;
+        uint8_t key_randomID[8];
+        uint8_t key_data[16];
+
+        NewLongTermKeyEvent(const std::vector<uint8_t> &data) {
+            *this = *reinterpret_cast<const NewLongTermKeyEvent *>(data.data());
+            toHost();
+
+            // Log it
+            Logger::info(debugText());
+        }
+
+        void toNetwork() {
+            header.toNetwork();
+            key_encryptedDiversifier = Utils::endianToHci(key_encryptedDiversifier);
+        }
+
+        void toHost() {
+            header.toHost();
+            key_encryptedDiversifier = Utils::endianToHost(key_encryptedDiversifier);
+        }
+
+        std::string debugText() {
+            std::string text = "";
+            std::string addieType;
+            std::string keyTypeString;
+            std::string masterString = "Yes";
+            if(key_master==0) {
+                masterString = "No";
+            }
+            switch(key_addressType) {
+            case 0x00:
+                addieType = "BR/EDR"; break;
+            case 0x01:
+                addieType = "LE Public"; break;
+            case 0x02:
+                addieType = "LE Random"; break;
+            default:
+                addieType = "Unsupported value";
+            }
+            switch(key_type) {
+            case 0x00:
+                keyTypeString = "Unauthenticated legacy key"; break;
+            case 0x01:
+                keyTypeString = "Authenticated legacy key"; break;
+            case 0x02:
+                keyTypeString = "Unauthenticated key from P-256"; break;
+            case 0x03:
+                keyTypeString = "Authenticated key from P-256"; break;
+            case 0x04:
+                keyTypeString = "Debug key from P-256"; break;
+            default:
+                keyTypeString = "Unsupported value";
+            }
+            text += "> New Long Term Key event (Pairing/Bonding complete)\n";
+            text += "  + Event code         : " + Utils::hex(header.code) + " ("
+                    + HciAdapter::kEventTypeNames[header.code] + ")\n";
+            text += "  + Controller Id      : " + Utils::hex(header.controllerId) + "\n";
+            text += "  + Data size          : " + std::to_string(header.dataSize) + " bytes\n";
+            text += "  + Store Hint         : " + Utils::hex(store_hint) + "\n";
+            text += "  - Key                :\n";
+            text += "    + Address          : " + Utils::bluetoothAddressString(key_address) + "\n";
+            text += "    + Address type     : " + addieType + "\n";
+            text += "    + Type             : " + keyTypeString + "\n";
+            text += "    + Master           : " + masterString + "\n";
+            text += "    + Encryption Size  : " + Utils::hex(key_encryptionSize) + "\n";
+            text += "    + Enc. Diversifier : " + Utils::hex(key_encryptedDiversifier) + "\n";
+            text += "    + Random ID        : " + Utils::hex(key_randomID, 8) + "\n";
+            text += "    + Data             : " + Utils::hex(key_data, 16) + "\n";
+            return text;
+        }
+    }__attribute__((packed));
 
 	struct AdapterSettings
 	{

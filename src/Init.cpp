@@ -685,10 +685,12 @@ void configureAdapter()
 	bool cnFlag = info.currentSettings.isSet(HciAdapter::EHciConnectable) == TheServer->getEnableConnectable();
 	bool diFlag = info.currentSettings.isSet(HciAdapter::EHciDiscoverable) == TheServer->getEnableDiscoverable();
 	bool adFlag = info.currentSettings.isSet(HciAdapter::EHciAdvertising) == TheServer->getEnableAdvertising();
+	bool sspFlag = info.currentSettings.isSet(HciAdapter::EHciSecureSimplePairing) == TheServer->getEnableSecureSimplePairing();
+	bool hcFlag = info.currentSettings.isSet(HciAdapter::EHciHighSpeed) == TheServer->getEnableHighspeedConnect();
 	bool anFlag = (advertisingName.length() == 0 || advertisingName == info.name) && (advertisingShortName.length() == 0 || advertisingShortName == info.shortName);
 
 	// If everything is setup already, we're done
-	if (!pwFlag || !leFlag || !brFlag || !scFlag || !bnFlag || !cnFlag || !diFlag || !adFlag || !anFlag)
+	if (!pwFlag || !leFlag || !brFlag || !scFlag || !bnFlag || !cnFlag || !diFlag || !adFlag || !anFlag || !sspFlag || !hcFlag)
 	{
 		// We need it off to start with
 		if (pwFlag)
@@ -712,6 +714,28 @@ void configureAdapter()
 			Logger::info(SSTR << (TheServer->getEnableBREDR() ? "Enabling":"Disabling") << " BR/EDR");
 			if (!mgmt.setBredr(TheServer->getEnableBREDR())) { setRetry(); return; }
 		}
+
+		if( !sspFlag )
+		{
+		    Logger::info(SSTR << (TheServer->getEnableSecureSimplePairing() ? "Enabling":"Disabling") << " Secure Simple Pairing");
+		    if( TheServer->getEnableSecureSimplePairing() && !TheServer->getEnableBREDR() )
+		    {
+		        Logger::warn(SSTR << "Not enabling SSP without BR/EDR");
+		    } else {
+		        if (!mgmt.setSSP(TheServer->getEnableSecureSimplePairing())) { setRetry(); return; }
+		    }
+		}
+
+		if( !hcFlag )
+        {
+            Logger::info(SSTR << (TheServer->getEnableHighspeedConnect() ? "Enabling":"Disabling") << " Highspeed Connect");
+            if( TheServer->getEnableHighspeedConnect() && !TheServer->getEnableSecureSimplePairing() )
+            {
+                Logger::warn(SSTR << "Not enabling Highspeed Connect without SSP");
+            } else {
+                if (!mgmt.setHC(TheServer->getEnableHighspeedConnect())) { setRetry(); return; }
+            }
+        }
 
 		// Change the Secure Connections state?
 		if (!scFlag)

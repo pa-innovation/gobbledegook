@@ -83,6 +83,12 @@ struct Server
 
 	// Returns the requested setting the bondable state (true = enabled, false = disabled)
 	bool getEnableBondable() const { return enableBondable; }
+	
+	// Returns the requested setting for Secure Simple Pairing (SSP) (true = enabled, false = disabled)
+	bool getEnableSecureSimplePairing() const { return enableSecureSimplePairing; }
+	
+	// Returns the requested setting for Highspeed Connect (BR/EDR only) (true = enabled, false = disabled)
+	bool getEnableHighspeedConnect() const { return enableHighspeedConnect; }
 
 	// Returns our registered data getter
 	GGKServerDataGetter getDataGetter() const { return dataGetter; }
@@ -192,6 +198,12 @@ private:
 	// Secure connection requested state
 	bool enableSecureConnection;
 
+	// Secure Simple Paring used for BR/EDR (not LE -> this GATT server)
+	bool enableSecureSimplePairing;
+	
+	// Use Highspeed Connect for BR/EDR (not LE -> this GATT server)
+	bool enableHighspeedConnect;
+
 	// Connectable requested state
 	bool enableConnectable;
 
@@ -231,7 +243,7 @@ private:
 	// name.
 	std::string advertisingShortName;
 
-	// serviceName: The name of our server (collectino of services)
+	// serviceName: The name of our server (collection of services)
 	//
 	// This is set from the constructor.
 	//

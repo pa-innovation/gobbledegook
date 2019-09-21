@@ -224,6 +224,16 @@ struct Mgmt
 	// Returns true on success, otherwise false
 	bool setLE(bool newState);
 
+	// Set the Secure Simple Pairing (SSP) to `newState` (true = enabled, false = disabled)
+    //
+    // Returns true on success, otherwise false
+    bool setSSP(bool newState);
+
+    // Set the Highspeed Connect (HC) to `newState` (true = enabled, false = disabled)
+    // NOTE: requires SSP
+    // Returns true on success, otherwise false
+    bool setHC(bool newState);
+
 	// Set the advertising state to `newState` (0 = disabled, 1 = enabled (with consideration towards the connectable setting),
 	// 2 = enabled in connectable mode).
 	//

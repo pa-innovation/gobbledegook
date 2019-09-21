@@ -255,6 +255,8 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	enableDiscoverable = true;
 	enableAdvertising = true;
 	enableBondable = true;
+	enableSecureSimplePairing = true;
+	enableHighspeedConnect = true;
 
 	//
 	// Define the server
@@ -360,7 +362,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	.gattServiceBegin("hardware", "8e7934bdf06d48f6860483c94e0ec8f9")
 
 		// Characteristic: R,G,B color values (custom: 57edcf379f674c64a9076efaa28e1712)
-		.gattCharacteristicBegin("displaycolor", "57edcf379f674c64a9076efaa28e1712", {"read", "write"})
+		.gattCharacteristicBegin("displaycolor", "57edcf379f674c64a9076efaa28e1712", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
 			// Standard characteristic "ReadValue" method call
 			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -424,7 +426,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 
 
         // Characteristic: R,G,B color values (custom: 101caed5c43e4822bce1ed29a457f01b)
-        .gattCharacteristicBegin("buttoncolor", "101caed5c43e4822bce1ed29a457f01b", {"read", "write"})
+        .gattCharacteristicBegin("buttoncolor", "101caed5c43e4822bce1ed29a457f01b", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -487,7 +489,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 
 
         // Characteristic: Brightness percent (custom: a6848d4c81ea44cebc5381404e8e4969)
-        .gattCharacteristicBegin("brightness", "a6848d4c81ea44cebc5381404e8e4969", {"read", "write"})
+        .gattCharacteristicBegin("brightness", "a6848d4c81ea44cebc5381404e8e4969", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -546,7 +548,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Auto-Brightness toggle (custom: 25d2042ee4a24aa880bf949ce65cd7c0)
-        .gattCharacteristicBegin("autobright", "25d2042ee4a24aa880bf949ce65cd7c0", {"read", "write"})
+        .gattCharacteristicBegin("autobright", "25d2042ee4a24aa880bf949ce65cd7c0", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -606,7 +608,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 
 
         // Characteristic: Volume percent (custom: 5f00e8c711b34e66962d96ef45aae66c)
-        .gattCharacteristicBegin("volume", "5f00e8c711b34e66962d96ef45aae66c", {"read", "write"})
+        .gattCharacteristicBegin("volume", "5f00e8c711b34e66962d96ef45aae66c", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -672,7 +674,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
     .gattServiceBegin("wifi", "5f4615cc1cb44da9a8409d5266d65d0e")
 
         // Characteristic: SSID list (custom: 8fb508b822a548aab5402602e26016db)
-        .gattCharacteristicBegin("ssid_list", "8fb508b822a548aab5402602e26016db", {"write","notify"})
+        .gattCharacteristicBegin("ssid_list", "8fb508b822a548aab5402602e26016db", {"encrypt-authenticated-write","notify"})
 
             // Standard characteristic "WriteValue" method call
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -720,7 +722,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Wifi Status (custom: 6fcbf07c93f34fef866a7d9c8926596a)
-        .gattCharacteristicBegin("wifi_status", "6fcbf07c93f34fef866a7d9c8926596a", {"read","notify"})
+        .gattCharacteristicBegin("wifi_status", "6fcbf07c93f34fef866a7d9c8926596a", {"encrypt-authenticated-read","notify"})
 
 
             // Standard characteristic "ReadValue" method call
@@ -761,7 +763,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Connect to SSID (custom: 4fdaabaab9ec4624a1a76febcf9e6901)
-        .gattCharacteristicBegin("connect", "4fdaabaab9ec4624a1a76febcf9e6901", {"write"})
+        .gattCharacteristicBegin("connect", "4fdaabaab9ec4624a1a76febcf9e6901", {"encrypt-authenticated-write"})
 
             // Standard characteristic "WriteValue" method call
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -803,7 +805,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
     .gattServiceBegin("alarm", "447b7a3534ce419a94c18134f94b7889")
 
         // Characteristic: Alarm List (custom: 3de058344cab4d658d042463a5e9248f)
-        .gattCharacteristicBegin("alarm_list", "3de058344cab4d658d042463a5e9248f", {"write","notify"})
+        .gattCharacteristicBegin("alarm_list", "3de058344cab4d658d042463a5e9248f", {"encrypt-authenticated-write","notify"})
 
             // Standard characteristic "WriteValue" method call
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -851,7 +853,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Change Notification CRC (custom: d387d13edfbc475493855fa0c192fcb9)
-        .gattCharacteristicBegin("crc", "d387d13edfbc475493855fa0c192fcb9", {"read","notify"})
+        .gattCharacteristicBegin("crc", "d387d13edfbc475493855fa0c192fcb9", {"encrypt-authenticated-read","notify"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -888,7 +890,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Add an Alarm (custom: d25448326eeb4900a7cc7174ea67e0df)
-        .gattCharacteristicBegin("add_alarm", "d25448326eeb4900a7cc7174ea67e0df", {"write"})
+        .gattCharacteristicBegin("add_alarm", "d25448326eeb4900a7cc7174ea67e0df", {"encrypt-authenticated-write"})
 
             // Standard characteristic "WriteValue" method call
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -925,7 +927,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Delete an Alarm (custom: d4593d59f1f9493baf97f459b256d118)
-        .gattCharacteristicBegin("del_alarm", "d4593d59f1f9493baf97f459b256d118", {"write"})
+        .gattCharacteristicBegin("del_alarm", "d4593d59f1f9493baf97f459b256d118", {"encrypt-authenticated-write"})
 
             // Standard characteristic "WriteValue" method call
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -966,7 +968,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Edit an Alarm (custom: c61385db89bb452886b1f7b1dff6aa97)
-        .gattCharacteristicBegin("edit_alarm", "c61385db89bb452886b1f7b1dff6aa97", {"write"})
+        .gattCharacteristicBegin("edit_alarm", "c61385db89bb452886b1f7b1dff6aa97", {"encrypt-authenticated-write"})
 
             // Standard characteristic "WriteValue" method call
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1003,7 +1005,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Alarm Sound List (custom: ada4d25b255e441582d5ec6de21771c2)
-        .gattCharacteristicBegin("sounds", "ada4d25b255e441582d5ec6de21771c2", {"read"})
+        .gattCharacteristicBegin("sounds", "ada4d25b255e441582d5ec6de21771c2", {"encrypt-authenticated-read"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1040,7 +1042,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Play a Test Sound (custom: e4c042eabbb84547bcc7ea79cc8940bb)
-        .gattCharacteristicBegin("test_sound", "e4c042eabbb84547bcc7ea79cc8940bb", {"write"})
+        .gattCharacteristicBegin("test_sound", "e4c042eabbb84547bcc7ea79cc8940bb", {"encrypt-authenticated-write"})
 
             // Standard characteristic "WriteValue" method call
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1085,7 +1087,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
     .gattServiceBegin("software", "e0339a93c7694f8fb39d8bc94feb183c")
 
         // Characteristic: Time Mode(custom: f307c52b14af4162bad4d56c4df9e28a)
-        .gattCharacteristicBegin("time_mode", "f307c52b14af4162bad4d56c4df9e28a", {"read","write"})
+        .gattCharacteristicBegin("time_mode", "f307c52b14af4162bad4d56c4df9e28a", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
@@ -1142,7 +1144,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Doppler Status (custom: af1664900d964f0c9596aed9fb717b78)
-        .gattCharacteristicBegin("status", "af1664900d964f0c9596aed9fb717b78", {"read","notify"})
+        .gattCharacteristicBegin("status", "af1664900d964f0c9596aed9fb717b78", {"encrypt-authenticated-read","notify"})
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
@@ -1177,7 +1179,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Day of the Week (custom: d99cd3de563f4c5491a380d6cabedb1f)
-        .gattCharacteristicBegin("dotw", "d99cd3de563f4c5491a380d6cabedb1f", {"read","write"})
+        .gattCharacteristicBegin("dotw", "d99cd3de563f4c5491a380d6cabedb1f", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
@@ -1234,7 +1236,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Weather (custom: 0xdcadae6819034eea8fc4cc7435b12c4a)
-        .gattCharacteristicBegin("weather", "dcadae6819034eea8fc4cc7435b12c4a", {"read","write"})
+        .gattCharacteristicBegin("weather", "dcadae6819034eea8fc4cc7435b12c4a", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
@@ -1291,7 +1293,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Temperature Digits (custom: 0xe76f7eec8f3c4c0bb26d0e0371f9b3f0)
-        .gattCharacteristicBegin("temp", "e76f7eec8f3c4c0bb26d0e0371f9b3f0", {"read","write"})
+        .gattCharacteristicBegin("temp", "e76f7eec8f3c4c0bb26d0e0371f9b3f0", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
@@ -1348,7 +1350,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Traffic Indicator Bar (custom: 0xf0c5985d197546a09f250ffbd460bd0e)
-        .gattCharacteristicBegin("traffic", "f0c5985d197546a09f250ffbd460bd0e", {"read", "write"})
+        .gattCharacteristicBegin("traffic", "f0c5985d197546a09f250ffbd460bd0e", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1403,7 +1405,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Light Bar Mode (custom: 0x93a9a17141e04274acaf7ae7f7873fd4)
-        .gattCharacteristicBegin("light_bar", "93a9a17141e04274acaf7ae7f7873fd4", {"read", "write"})
+        .gattCharacteristicBegin("light_bar", "93a9a17141e04274acaf7ae7f7873fd4", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1458,7 +1460,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: IFTTT Button 1(custom: 0xdb736f32e0114d69b11795353ea92ef6)
-        .gattCharacteristicBegin("IFTTT1", "db736f32e0114d69b11795353ea92ef6", {"read", "write"})
+        .gattCharacteristicBegin("IFTTT1", "db736f32e0114d69b11795353ea92ef6", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1513,7 +1515,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: IFTTT Button 2(custom: 0x0adc78cfd69c495893a730aed2140f74)
-        .gattCharacteristicBegin("IFTTT2", "0adc78cfd69c495893a730aed2140f74", {"read", "write"})
+        .gattCharacteristicBegin("IFTTT2", "0adc78cfd69c495893a730aed2140f74", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1572,7 +1574,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	.gattServiceBegin("alexa", "fc0acbe67b664a439d30b39cd3e7f4b0")
 
 		// Characteristic: Request Challenge (custom: 0x0e8c74b16b984f40af47513af053c50f)
-		.gattCharacteristicBegin("generate", "0e8c74b16b984f40af47513af053c50f", {"read","write","notify"})
+		.gattCharacteristicBegin("generate", "0e8c74b16b984f40af47513af053c50f", {"encrypt-authenticated-read", "encrypt-authenticated-write","notify"})
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
@@ -1629,7 +1631,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Challenge (custom: 0x9c2ba4af872249b19b2deec923ace9c8)
-        .gattCharacteristicBegin("challenge", "9c2ba4af872249b19b2deec923ace9c8", {"read","notify"})
+        .gattCharacteristicBegin("challenge", "9c2ba4af872249b19b2deec923ace9c8", {"encrypt-authenticated-read","notify"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1666,7 +1668,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Alexa Signon Key (custom: 0x683517267b7e4d569b8097fafd36e0a0)
-        .gattCharacteristicBegin("key", "683517267b7e4d569b8097fafd36e0a0", {"write"})
+        .gattCharacteristicBegin("key", "683517267b7e4d569b8097fafd36e0a0", {"encrypt-authenticated-write"})
             // Standard characteristic "WriteValue" method call
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
@@ -1707,7 +1709,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	.gattServiceBegin("doptime", "3eda5f6eb32f48c48475dbf1de865d04")
 
 		// Characteristic: The UTC time currently set on doppler (custom: 83a20a54cc854e208cdc619a05cee43b)
-		.gattCharacteristicBegin("utctime", "83a20a54cc854e208cdc619a05cee43b", {"read", "write"})
+		.gattCharacteristicBegin("utctime", "83a20a54cc854e208cdc619a05cee43b", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
 			// Standard characteristic "ReadValue" method call
 			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1770,7 +1772,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 
 
         // Characteristic: Extra time offset minutes (custom: 64f9476b044c479e994fa6fd18a9f9df)
-        .gattCharacteristicBegin("offset", "64f9476b044c479e994fa6fd18a9f9df", {"read", "write"})
+        .gattCharacteristicBegin("offset", "64f9476b044c479e994fa6fd18a9f9df", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1830,7 +1832,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 
 
         // Characteristic: Timezone (custom: 60a562e87ed44a32a7960b342a784139)
-        .gattCharacteristicBegin("timezone", "60a562e87ed44a32a7960b342a784139", {"read", "write"})
+        .gattCharacteristicBegin("timezone", "60a562e87ed44a32a7960b342a784139", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
@@ -1885,7 +1887,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: Use NTP time toggle (custom: 3e3be9b1b5b54d10846001585028deb5)
-        .gattCharacteristicBegin("ntp", "3e3be9b1b5b54d10846001585028deb5", {"read", "write"})
+        .gattCharacteristicBegin("ntp", "3e3be9b1b5b54d10846001585028deb5", {"encrypt-authenticated-read", "encrypt-authenticated-write"})
 
             // Standard characteristic "ReadValue" method call
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
