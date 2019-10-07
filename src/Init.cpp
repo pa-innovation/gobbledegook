@@ -784,6 +784,9 @@ void configureAdapter()
 		if (!mgmt.setPowered(true)) { setRetry(); return; }
 	}
 
+	// register an hci event listener from the Server
+	HciAdapter::getInstance().registerEventListener(TheServer->getDataSetter());
+
 	Logger::info("The Bluetooth adapter is fully configured");
 
 	// We're all set, nothing to do!

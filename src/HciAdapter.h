@@ -468,6 +468,46 @@ public:
 		}
 	} __attribute__((packed));
 
+    struct AuthenticationFailedEvent
+    {
+        HciHeader header;
+        uint8_t address[6];
+        uint8_t addressType;
+        uint8_t reason;
+
+        AuthenticationFailedEvent(const std::vector<uint8_t> &data)
+        {
+            *this = *reinterpret_cast<const AuthenticationFailedEvent *>(data.data());
+            toHost();
+
+            // Log it
+            Logger::info(debugText());
+        }
+
+        void toNetwork()
+        {
+            header.toNetwork();
+        }
+
+        void toHost()
+        {
+            header.toHost();
+        }
+
+        std::string debugText()
+        {
+            std::string text = "";
+            text += "> DeviceDisconnected event\n";
+            text += "  + Event code         : " + Utils::hex(header.code) + " (" + HciAdapter::kEventTypeNames[header.code] + ")\n";
+            text += "  + Controller Id      : " + Utils::hex(header.controllerId) + "\n";
+            text += "  + Data size          : " + std::to_string(header.dataSize) + " bytes\n";
+            text += "  + Address            : " + Utils::bluetoothAddressString(address) + "\n";
+            text += "  + Address type       : " + Utils::hex(addressType) + "\n";
+            text += "  + Reason             : " + Utils::hex(reason);
+            return text;
+        }
+    } __attribute__((packed));
+
     struct ClassOfDeviceChangedEvent
     {
         HciHeader header;
@@ -1084,6 +1124,9 @@ public:
 	// This mehtod should not be called directly. Rather, it runs continuously on a thread until the server shuts down
 	void runEventThread();
 
+	// TODO: this should register a callback (and deregister during cleanup), for now just give it a way of notifying
+	bool registerEventListener(GGKServerDataSetter const &hack) {hackCallback = hack; return true;}
+
 private:
 	// Private constructor for our Singleton
 	HciAdapter() : commandResponseLock(commandResponseMutex), conditionalValue(-1), activeConnections(0) {}
@@ -1114,6 +1157,8 @@ private:
 	std::mutex commandResponseMutex;
 	std::unique_lock<std::mutex> commandResponseLock;
 	int conditionalValue;
+
+	GGKServerDataSetter hackCallback = NULL;
 
 	// Our active connection count
 	int activeConnections;

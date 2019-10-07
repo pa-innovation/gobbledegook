@@ -354,6 +354,27 @@ void HciAdapter::runEventThread()
 				}
 				break;
 			}
+			case Mgmt::EAuthenticationFailedEvent:
+			{
+			    AuthenticationFailedEvent event(responsePacket);
+			    if( event.reason == Mgmt::EMGMT_STATUS_AUTH_FAILED ) {
+			        Logger::info(SSTR << "Authentication failed (from remote)");
+	                // TODO: fix this hack
+	                /**
+	                 * To anyone reading this, the proper thing to do here is probably register a callback into HciAdapter
+	                 * that can send asynchronous events back to the application which is running it. HCI shouldnt know
+	                 * anything about TheServer... however i am in a hurry today so i am just plumbing an already existing
+	                 * communication method (our dataSetter for GATT services) down here and hacking a string value that
+	                 * wont be used to listen to in my GATT profile.
+	                 */
+	                if( (hackCallback)("GGK/EVENT/EAuthenticationFailedEvent", static_cast<const void *>(event.address)) == 0 ) {
+	                    Logger::error(SSTR << "Unable to update EAuthenticationFailedEvent on data setter");
+	                }
+	                break;
+			    }
+			    // Just logging that this occurred for now
+			    break;
+			}
 			// Class of Device Changed event
 			case Mgmt::EClassOfDeviceChangedEvent:
 			{
@@ -379,6 +400,17 @@ void HciAdapter::runEventThread()
 			case Mgmt::ENewLongTermKeyEvent:
             {
                 NewLongTermKeyEvent event(responsePacket);
+                // TODO: fix this hack
+                /**
+                 * To anyone reading this, the proper thing to do here is probably register a callback into HciAdapter
+                 * that can send asynchronous events back to the application which is running it. HCI shouldnt know
+                 * anything about TheServer... however i am in a hurry today so i am just plumbing an already existing
+                 * communication method (our dataSetter for GATT services) down here and hacking a string value that
+                 * wont be used to listen to in my GATT profile.
+                 */
+                if( (hackCallback)("GGK/EVENT/ENewLongTermKeyEvent", static_cast<const void *>(&event.key_master)) == 0 ) {
+                    Logger::error(SSTR << "Unable to update ENewLongTermKeyEvent on data setter");
+                }
                 break;
             }
 			case Mgmt::EPasskeyNotifyEvent:

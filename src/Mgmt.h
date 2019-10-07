@@ -165,6 +165,30 @@ struct Mgmt
 		ESetAppearanceCommand                                 = 0x0043
 	};
 
+    // These indices should match those in lib/mgmt.h in bluez
+    enum ConnectionStatusCodes
+    {
+        EMGMT_STATUS_SUCCESS = 0x00,
+        EMGMT_STATUS_UNKNOWN_COMMAND = 0x01,
+        EMGMT_STATUS_NOT_CONNECTED = 0x02,
+        EMGMT_STATUS_FAILED = 0x03,
+        EMGMT_STATUS_CONNECT_FAILED = 0x04,
+        EMGMT_STATUS_AUTH_FAILED = 0x05,
+        EMGMT_STATUS_NOT_PAIRED = 0x06,
+        EMGMT_STATUS_NO_RESOURCES = 0x07,
+        EMGMT_STATUS_TIMEOUT = 0x08,
+        EMGMT_STATUS_ALREADY_CONNECTED = 0x09,
+        EMGMT_STATUS_BUSY = 0x0a,
+        EMGMT_STATUS_REJECTED = 0x0b,
+        EMGMT_STATUS_NOT_SUPPORTED = 0x0c,
+        EMGMT_STATUS_INVALID_PARAMS = 0x0d,
+        EMGMT_STATUS_DISCONNECTED = 0x0e,
+        EMGMT_STATUS_NOT_POWERED = 0x0f,
+        EMGMT_STATUS_CANCELLED = 0x10,
+        EMGMT_STATUS_INVALID_INDEX = 0x11,
+        EMGMT_STATUS_RFKILLED = 0x12
+    };
+
 	// Construct the Mgmt device
 	//
 	// Set `controllerIndex` to the zero-based index of the device as recognized by the OS. If this parameter is omitted, the index
