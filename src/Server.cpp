@@ -249,7 +249,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	dataSetter = setter;
 
 	// Adapter configuration flags - set these flags based on how you want the adapter configured
-	enableBREDR = true;
+	enableBREDR = false;
 	enableSecureConnection = false;
 	enableConnectable = true;
 	enableDiscoverable = true;

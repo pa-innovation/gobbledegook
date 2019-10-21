@@ -766,11 +766,12 @@ void configureAdapter()
 		}
 
 		// Change the Advertising state?
-		if (!adFlag)
-		{
+//		if (!adFlag)
+//		{
 			Logger::info(SSTR << (TheServer->getEnableAdvertising() ? "Enabling":"Disabling") << " Advertising");
-			if (!mgmt.setAdvertising(TheServer->getEnableAdvertising() ? 1 : 0)) { setRetry(); return; }
-		}
+			// Turn on advertising with setting "0x02" which will advertise regardless of connectable setting
+			if (!mgmt.setAdvertising(TheServer->getEnableAdvertising() ? 2 : 0)) { Logger::error(SSTR << "Failed to setAdvertising"); setRetry(); return; }
+//		}
 
 		// Set the name?
 		if (!anFlag)
