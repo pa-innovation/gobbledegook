@@ -681,16 +681,18 @@ void configureAdapter()
 	bool leFlag = info.currentSettings.isSet(HciAdapter::EHciLowEnergy) == true;
 	bool brFlag = info.currentSettings.isSet(HciAdapter::EHciBasicRate_EnhancedDataRate) == TheServer->getEnableBREDR();
 	bool scFlag = info.currentSettings.isSet(HciAdapter::EHciSecureConnections) == TheServer->getEnableSecureConnection();
+	bool llsFlag = info.currentSettings.isSet(HciAdapter::EHciLinkLevelSecurity) == TheServer->getEnableLinkLayerSecurity();
 	bool bnFlag = info.currentSettings.isSet(HciAdapter::EHciBondable) == TheServer->getEnableBondable();
 	bool cnFlag = info.currentSettings.isSet(HciAdapter::EHciConnectable) == TheServer->getEnableConnectable();
 	bool diFlag = info.currentSettings.isSet(HciAdapter::EHciDiscoverable) == TheServer->getEnableDiscoverable();
 	bool adFlag = info.currentSettings.isSet(HciAdapter::EHciAdvertising) == TheServer->getEnableAdvertising();
 	bool sspFlag = info.currentSettings.isSet(HciAdapter::EHciSecureSimplePairing) == TheServer->getEnableSecureSimplePairing();
 	bool hcFlag = info.currentSettings.isSet(HciAdapter::EHciHighSpeed) == TheServer->getEnableHighspeedConnect();
+	bool fcFlag = info.currentSettings.isSet(HciAdapter::EHciFastConnectable) == TheServer->getEnableFastConnect();
 	bool anFlag = (advertisingName.length() == 0 || advertisingName == info.name) && (advertisingShortName.length() == 0 || advertisingShortName == info.shortName);
 
 	// If everything is setup already, we're done
-	if (!pwFlag || !leFlag || !brFlag || !scFlag || !bnFlag || !cnFlag || !diFlag || !adFlag || !anFlag || !sspFlag || !hcFlag)
+	if (!pwFlag || !leFlag || !brFlag || !scFlag || !llsFlag || !bnFlag || !cnFlag || !diFlag || !adFlag || !anFlag || !sspFlag || !hcFlag || !fcFlag)
 	{
 		// We need it off to start with
 		if (pwFlag)
@@ -737,12 +739,32 @@ void configureAdapter()
             }
         }
 
+		if( !fcFlag )
+		{
+            Logger::info(SSTR << (TheServer->getEnableFastConnect() ? "Enabling":"Disabling") << " Fast Connect");
+            if( TheServer->getEnableFastConnect() && !TheServer->getEnableBREDR() )
+            {
+                Logger::warn(SSTR << "Not enabling Fast Connect without BR/EDR");
+            } else {
+                if (!mgmt.setFC(TheServer->getEnableFastConnect())) { setRetry(); return; }
+            }
+        }
+
 		// Change the Secure Connections state?
 		if (!scFlag)
 		{
 			Logger::info(SSTR << (TheServer->getEnableSecureConnection() ? "Enabling":"Disabling") << " Secure Connections");
+			// 0x01 enables secure connections, which may represent Security Mode 2
+			// 0x02 is secure connections only mode (Security Level 4, Security Mode 1)
 			if (!mgmt.setSecureConnections(TheServer->getEnableSecureConnection() ? 1 : 0)) { setRetry(); return; }
 		}
+
+		// Change the Bondable state?
+        if (!llsFlag)
+        {
+            Logger::info(SSTR << (TheServer->getEnableLinkLayerSecurity() ? "Enabling":"Disabling") << " Link Level Security");
+            if (!mgmt.setLLS(TheServer->getEnableLinkLayerSecurity())) { setRetry(); return; }
+        }
 
 		// Change the Bondable state?
 		if (!bnFlag)
@@ -762,6 +784,7 @@ void configureAdapter()
 		if (!diFlag)
 		{
 			Logger::debug(SSTR << (TheServer->getEnableDiscoverable() ? "Enabling":"Disabling") << " Discoverable");
+			// 0x01 is general discoverable, putting 0 as timeout means indefinite.
 			if (!mgmt.setDiscoverable(TheServer->getEnableDiscoverable() ? 1 : 0, 0)) { setRetry(); return; }
 		}
 

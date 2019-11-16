@@ -233,6 +233,11 @@ struct Mgmt
 	// Returns true on success, otherwise false
 	bool setSecureConnections(uint8_t newState);
 
+	// Set the Link Layer Security state (true = enabled, false = disabled)
+	//
+	// Returns true on success, otherwise false
+	bool setLLS(bool newState);
+
 	// Set the bondable state to `newState` (true = enabled, false = disabled)
 	//
 	// Returns true on success, otherwise false
@@ -253,10 +258,15 @@ struct Mgmt
     // Returns true on success, otherwise false
     bool setSSP(bool newState);
 
-    // Set the Highspeed Connect (HC) to `newState` (true = enabled, false = disabled)
+    // Set the Highspeed Connection (HC) to `newState` (true = enabled, false = disabled)
     // NOTE: requires SSP
     // Returns true on success, otherwise false
     bool setHC(bool newState);
+
+    // Set the Fast Connect (FC) to `newState` (true = enabled, false = disabled)
+    // NOTE: requires BR/EDR
+    // Returns true on success, otherwise false
+    bool setFC(bool newState);
 
 	// Set the advertising state to `newState` (0 = disabled, 1 = enabled (with consideration towards the connectable setting),
 	// 2 = enabled in connectable mode).

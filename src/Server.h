@@ -71,6 +71,9 @@ struct Server
 
 	// Returns the requested setting for secure connections (true = enabled, false = disabled)
 	bool getEnableSecureConnection() const { return enableSecureConnection; }
+	
+	// Returns the requested setting for secure connections (true = enabled, false = disabled)
+	bool getEnableLinkLayerSecurity() const { return enableLinkLayerSecurity; }
 
 	// Returns the requested setting the connectable state (true = enabled, false = disabled)
 	bool getEnableConnectable() const { return enableConnectable; }
@@ -87,8 +90,11 @@ struct Server
 	// Returns the requested setting for Secure Simple Pairing (SSP) (true = enabled, false = disabled)
 	bool getEnableSecureSimplePairing() const { return enableSecureSimplePairing; }
 	
-	// Returns the requested setting for Highspeed Connect (BR/EDR only) (true = enabled, false = disabled)
+	// Returns the requested setting for Highspeed Connection (BR/EDR only) (true = enabled, false = disabled)
 	bool getEnableHighspeedConnect() const { return enableHighspeedConnect; }
+	
+	// Returns the requested setting for Fast Connect (BR/EDR only) (true = enabled, false = disabled)
+	bool getEnableFastConnect() const { return enableFastConnect; }
 
 	// Returns our registered data getter
 	GGKServerDataGetter getDataGetter() const { return dataGetter; }
@@ -194,15 +200,28 @@ private:
 
 	// BR/EDR requested state
 	bool enableBREDR;
+	
+	// Link-layer security state (Security Mode 3)
+	bool enableLinkLayerSecurity;
 
 	// Secure connection requested state
 	bool enableSecureConnection;
 
+    /**
+     * BEGIN BR/EDR specific attributes: will not activate unless enableBREDR == true;
+     * These attributes are useful if you are running a Dual Mode bluetooth connection (A2DP streaming and BLE commands, i.e.)
+     **/
 	// Secure Simple Paring used for BR/EDR (not LE -> this GATT server)
 	bool enableSecureSimplePairing;
 	
-	// Use Highspeed Connect for BR/EDR (not LE -> this GATT server)
+	// Use Highspeed Connections for BR/EDR (not LE -> this GATT server)
 	bool enableHighspeedConnect;
+	
+	// use Fast-Connect with increased power consumption for BR/EDR (not LE -> this GATT server)
+	bool enableFastConnect;
+	/**
+	 * END BR/EDR specific attributes
+	 **/
 
 	// Connectable requested state
 	bool enableConnectable;

@@ -160,6 +160,14 @@ bool Mgmt::setSecureConnections(uint8_t newState)
 	return setState(Mgmt::ESetSecureConnectionsCommand, controllerIndex, newState);
 }
 
+// Set the Link Layer Security state to `newState` (true = enabled, false = disabled)
+//
+// Returns true on success, otherwise false
+bool Mgmt::setLLS(bool newState)
+{
+    return setState(Mgmt::ESetLinkSecurityCommand, controllerIndex, newState ? 1 : 0);
+}
+
 // Set the bondable state to `newState` (true = enabled, false = disabled)
 //
 // Returns true on success, otherwise false
@@ -184,7 +192,7 @@ bool Mgmt::setLE(bool newState)
 	return setState(Mgmt::ESetLowEnergyCommand, controllerIndex, newState ? 1 : 0);
 }
 
-// Set the LE state to `newState` (true = enabled, false = disabled)
+// Set the SSP state to `newState` (true = enabled, false = disabled)
 //
 // Returns true on success, otherwise false
 bool Mgmt::setSSP(bool newState)
@@ -192,12 +200,20 @@ bool Mgmt::setSSP(bool newState)
     return setState(Mgmt::ESetSecureSimplePairingCommand, controllerIndex, newState ? 1 : 0);
 }
 
-// Set the LE state to `newState` (true = enabled, false = disabled)
+// Set the HC state to `newState` (true = enabled, false = disabled)
 //
 // Returns true on success, otherwise false
 bool Mgmt::setHC(bool newState)
 {
     return setState(Mgmt::ESetHighSpeedCommand, controllerIndex, newState ? 1 : 0);
+}
+
+// Set the FC state to `newState` (true = enabled, false = disabled)
+//
+// Returns true on success, otherwise false
+bool Mgmt::setFC(bool newState)
+{
+    return setState(Mgmt::ESetFastConnectableCommand, controllerIndex, newState ? 1 : 0);
 }
 
 // Set the advertising state to `newState` (0 = disabled, 1 = enabled (with consideration towards the connectable setting),
