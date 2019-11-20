@@ -349,7 +349,11 @@ public:
 			toHost();
 
 			// Log it
-			Logger::info(debugText());
+			if( status ) {
+			    Logger::error(debugText());
+			} else {
+			    Logger::info(debugText());
+			}
 		}
 
 		void toNetwork()

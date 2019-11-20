@@ -79,7 +79,7 @@ static GDBusObjectManager *pBluezObjectManager = nullptr;
 static GDBusObject *pBluezAdapterObject = nullptr;
 static GDBusObject *pBluezDeviceObject = nullptr;
 static GDBusProxy *pBluezGattManagerProxy = nullptr;
-static GDBusProxy *pBluezAdapterInterfaceProxy = nullptr;
+//static GDBusProxy *pBluezAdapterInterfaceProxy = nullptr;
 static GDBusProxy *pBluezDeviceInterfaceProxy = nullptr;
 static GDBusProxy *pBluezAdapterPropertiesInterfaceProxy = nullptr;
 static bool bOwnedNameAcquired = false;
@@ -201,11 +201,11 @@ void uninit()
 		pBluezDeviceObject = nullptr;
 	}
 
-	if (nullptr != pBluezAdapterInterfaceProxy)
-	{
-		g_object_unref(pBluezAdapterInterfaceProxy);
-		pBluezAdapterInterfaceProxy = nullptr;
-	}
+//	if (nullptr != pBluezAdapterInterfaceProxy)
+//	{
+//		g_object_unref(pBluezAdapterInterfaceProxy);
+//		pBluezAdapterInterfaceProxy = nullptr;
+//	}
 
 	if (nullptr != pBluezDeviceInterfaceProxy)
 	{
@@ -855,12 +855,12 @@ void findAdapterInterface()
 		if (nullptr == pBluezGattManagerProxy) { continue; }
 
 		// Get the interface proxy for this adapter - this will come in handy later
-		pBluezAdapterInterfaceProxy = reinterpret_cast<GDBusProxy *>(g_dbus_object_get_interface(pBluezAdapterObject, "org.bluez.Adapter1"));
-		if (nullptr == pBluezAdapterInterfaceProxy)
-		{
-			Logger::warn(SSTR << "Failed to get adapter proxy for interface 'org.bluez.Adapter1'");
-			continue;
-		}
+//		pBluezAdapterInterfaceProxy = reinterpret_cast<GDBusProxy *>(g_dbus_object_get_interface(pBluezAdapterObject, "org.bluez.Adapter1"));
+//		if (nullptr == pBluezAdapterInterfaceProxy)
+//		{
+//			Logger::warn(SSTR << "Failed to get adapter proxy for interface 'org.bluez.Adapter1'");
+//			continue;
+//		}
 
 		// Get the interface proxy for this adapter's properties - this will come in handy later
 		pBluezAdapterPropertiesInterfaceProxy = reinterpret_cast<GDBusProxy *>(g_dbus_object_get_interface(pBluezAdapterObject, "org.freedesktop.DBus.Properties"));

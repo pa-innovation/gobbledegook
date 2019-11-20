@@ -249,21 +249,19 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	dataSetter = setter;
 
 	// Adapter configuration flags - set these flags based on how you want the adapter configured
-	enableBREDR = true;
-	enableSecureConnection = true;
-	enableLinkLayerSecurity = true;
-	enableConnectable = true;
-	enableDiscoverable = true;
-	enableAdvertising = true;
-	enableBondable = true;
-	enableSecureSimplePairing = true;
-	enableHighspeedConnect = true;
-	enableFastConnect = true;
+	enableBREDR = dataMap.at("enableBREDR") == "true";
+	enableSecureConnection = dataMap.at("enableSecureConnection") == "true";
+	enableLinkLayerSecurity = dataMap.at("enableLinkLayerSecurity") == "true";
+	enableConnectable = dataMap.at("enableConnectable") == "true";
+	enableDiscoverable = dataMap.at("enableDiscoverable") == "true";
+	enableAdvertising = dataMap.at("enableAdvertising") == "true";
+	enableBondable = dataMap.at("enableBondable") == "true";
+	enableSecureSimplePairing = dataMap.at("enableSecureSimplePairing") == "true";
+	enableHighspeedConnect = dataMap.at("enableHighspeedConnect") == "true";
+	enableFastConnect = dataMap.at("enableFastConnect") == "true";
 	
-	//const char *READ_SECURITY_SETTING="read";
-	//const char *WRITE_SECURITY_SETTING="write";
-	const char *READ_SECURITY_SETTING="encrypt-authenticated-read";
-	const char *WRITE_SECURITY_SETTING="encrypt-authenticated-write";
+	const char *READ_SECURITY_SETTING=dataMap.at("readSecuritySetting").c_str();
+	const char *WRITE_SECURITY_SETTING=dataMap.at("writeSecuritySetting").c_str();
 
 	//
 	// Define the server
