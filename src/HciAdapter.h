@@ -91,6 +91,21 @@ public:
 		EHciStaticAddress = (1<<15)
 	};
 
+    // Advertising Features Settings
+    enum AdvertisingFeaturesSettings
+    {
+        EAdvSwitchConnectable = (1<<0),
+        EAdvDiscoverable = (1<<1),
+        EAdvLimitedDiscoverable = (1<<2),
+        EAdvAddFlags = (1<<3),
+        EAdvAddTX = (1<<4),
+        EAdvAddAppearance = (1<<5),
+        EAdvAddLocalName = (1<<6),
+        EAdvSecondaryLE1M = (1<<7),
+        EAdvSecondaryLE2M = (1<<8),
+        EAdvSecondaryLECoded = (1<<9),
+    };
+
 	// Major Service Classes from www.bluetooth.com/specifications/assigned-numbers/baseband/
 	enum MajorServiceClasses
 	{
@@ -996,6 +1011,71 @@ public:
 		}
 	} __attribute__((packed));
 
+	struct AdvertisingSettings
+	{
+        uint32_t masks;
+
+        void toNetwork() {
+            masks = Utils::endianToHci(masks);
+        }
+
+        void toHost() {
+            masks = Utils::endianToHost(masks);
+        }
+
+        bool isSet(AdvertisingFeaturesSettings mask) {
+            return (masks & mask) != 0;
+        }
+
+        // Returns a human-readable string of flags and settings
+        std::string toString() {
+            std::string text = "";
+            if(isSet(EAdvSwitchConnectable)) {
+                text += "Switch into Connectable, ";
+            }
+            if(isSet(EAdvDiscoverable)) {
+                text += "Disc, ";
+            }
+            if(isSet(EAdvLimitedDiscoverable)) {
+                text += "Limited Disc, ";
+            }
+            if(isSet(EAdvAddFlags)) {
+                text += "Add Flags, ";
+            }
+            if(isSet(EAdvAddTX)) {
+                text += "Add TX, ";
+            }
+            if(isSet(EAdvAddAppearance)) {
+                text += "Add Appearance, ";
+            }
+            if(isSet(EAdvAddLocalName)) {
+                text += "Add Local Name, ";
+            }
+            if(isSet(EAdvSecondaryLE1M)) {
+                text += "LE1M, ";
+            }
+            if(isSet(EAdvSecondaryLE2M)) {
+                text += "LE2M, ";
+            }
+            if(isSet(EAdvSecondaryLECoded)) {
+                text += "LECoded, ";
+            }
+
+            if(text.length() != 0) {
+                text = text.substr(0, text.length() - 2);
+            }
+
+            return text;
+        }
+
+        std::string debugText() {
+            std::string text = "";
+            text += "> Adapter settings\n";
+            text += "  + " + toString();
+            return text;
+        }
+    }__attribute__((packed));
+
 	// The comments documenting these fields are very high level. There is a lot of detailed information not present, for example
 	// some values are not available at all times. This is fully documented in:
 	//
@@ -1056,6 +1136,35 @@ public:
 		}
 	} __attribute__((packed));
 
+	struct AdvertisingFeatures
+	{
+	    AdvertisingSettings supportedFlags;
+        uint8_t maxAdv;
+        uint8_t maxScanRsp;
+        uint8_t maxInstances;
+        uint8_t numInstances;
+
+        void toNetwork() {
+            supportedFlags.toNetwork();
+        }
+
+        void toHost() {
+            supportedFlags.toHost();
+        }
+
+        std::string debugText() {
+            std::string text = "";
+            text += "> Advertising Features\n";
+            text += "  + Settings (hex)   : " + Utils::hex(supportedFlags.masks) + "\n";
+            text += "  + Settings         : " + supportedFlags.toString() + "\n";
+            text += "  + Max Adv Data Len : " + std::to_string(maxAdv) + "\n";
+            text += "  + Max Scan Resp Len: " + std::to_string(maxScanRsp) + "\n";
+            text += "  + Max Instances    : " + std::to_string(maxInstances) + "\n";
+            text += "  + Num Instances    : " + std::to_string(numInstances) + "\n";
+            return text;
+        }
+    }__attribute__((packed));
+
 	struct LocalName
 	{
 		char name[249];
@@ -1082,11 +1191,12 @@ public:
 		return instance;
 	}
 
-	AdapterSettings getAdapterSettings() { return adapterSettings; }
-	ControllerInformation getControllerInformation() { return controllerInformation; }
-	VersionInformation getVersionInformation() { return versionInformation; }
-	LocalName getLocalName() { return localName; }
-	int getActiveConnectionCount() { return activeConnections; }
+	inline AdapterSettings getAdapterSettings() { return adapterSettings; }
+	inline ControllerInformation getControllerInformation() { return controllerInformation; }
+	inline VersionInformation getVersionInformation() { return versionInformation; }
+	inline AdvertisingFeatures getAdvertisingFeatures() { return advertisingFeatures; }
+	inline LocalName getLocalName() { return localName; }
+	inline int getActiveConnectionCount() { return activeConnections; }
 
 	//
 	// Disallow copies of our singleton (c++11)
@@ -1155,6 +1265,7 @@ private:
 	AdapterSettings adapterSettings;
 	ControllerInformation controllerInformation;
 	VersionInformation versionInformation;
+	AdvertisingFeatures advertisingFeatures;
 	LocalName localName;
 
 	std::condition_variable cvCommandResponse;

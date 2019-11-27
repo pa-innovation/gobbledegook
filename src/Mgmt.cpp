@@ -222,10 +222,58 @@ bool Mgmt::setFC(bool newState)
 // Returns true on success, otherwise false
 bool Mgmt::setAdvertising(uint8_t newState)
 {
-    // TODO turn this off 0x0 always
-	return setState(Mgmt::ESetAdvertisingCommand, controllerIndex, newState);
-	// TODO: use ReadAdvertisingFeaturesCommand to see what we can do
-	// TODO: use EAddAdvertisingCommand
+
+    if(!setState(Mgmt::ESetAdvertisingCommand, controllerIndex, 0)) {
+        Logger::error(SSTR << "Failed to setAdvertising to 0");
+        return false;
+    }
+
+    if( newState != 0 ) {
+        // Get the Advertising Features to see what we can do.
+        HciAdapter::HciHeader readAdvCmd;
+        readAdvCmd.code = Mgmt::EReadAdvertisingFeaturesCommand;
+        readAdvCmd.controllerId = controllerIndex;
+        readAdvCmd.dataSize = 0;
+        if(!HciAdapter::getInstance().sendCommand(readAdvCmd)) {
+            Logger::error(SSTR << "Failed to send ReadAdvertisingFeaturesCommand");
+            return false;
+        }
+
+        // Now turn all that stuff on (that we want).
+        HciAdapter::AdvertisingSettings wantedFeatures;
+        wantedFeatures.masks = HciAdapter::EAdvSwitchConnectable | HciAdapter::EAdvDiscoverable |
+               HciAdapter::EAdvAddFlags | HciAdapter::EAdvAddTX | HciAdapter::EAdvAddAppearance | HciAdapter::EAdvAddLocalName;
+        wantedFeatures.toNetwork();
+        const int ADV_DATA_LEN = 22;
+        const int SCAN_RESP_LEN = 27;
+        struct SRequest : HciAdapter::HciHeader
+        {
+            uint8_t instance;
+            HciAdapter::AdvertisingSettings flags;
+            uint16_t duration;
+            uint16_t timeout;
+            uint8_t advDataLen;
+            uint8_t scanRespLen;
+            //uint8_t advData[ADV_DATA_LEN];
+            //uint8_t scanResp[SCAN_RESP_LEN];
+        } __attribute__((packed));
+
+        SRequest request;
+        request.code = Mgmt::EAddAdvertisingCommand;
+        request.controllerId = controllerIndex;
+        request.dataSize = sizeof(SRequest) - sizeof(HciAdapter::HciHeader);
+        // USE 1 for now, assume no other instances exist
+        request.instance = 1;
+        request.flags = wantedFeatures;
+        request.duration = 0;
+        request.timeout = 0;
+        request.advDataLen = 0;
+        request.scanRespLen = 0;
+
+        return(HciAdapter::getInstance().sendCommand(request));
+    }
+    // TODO: Mgmt::ERemoveAdvertsingCommand to remove all the indexes
+    return false;
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------

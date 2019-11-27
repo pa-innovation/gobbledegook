@@ -632,18 +632,12 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             // Standard characteristic "WriteValue" method call
             .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
-	            GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
-	            gsize size;
-	            gconstpointer pPtr = g_variant_get_fixed_array(const_cast<GVariant *>(pAyBuffer), &size, 1);
-	            // TODO: check size == 1
-                uint8_t disco = *static_cast<const uint8_t *>(pPtr);
-
-                self.setDataValue("hardware/disconnect", disco);
+	            self.setDataPointer("hardware/disconnect", "");
 
                 // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
                 // Characteristic interface (which just so happens to be the same interface passed into our self
                 // parameter) we can that parameter to call our own onUpdatedValue method
-                self.callOnUpdatedValue(pConnection, &disco);
+                self.callOnUpdatedValue(pConnection, pUserData);
 
                 // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
                 // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").

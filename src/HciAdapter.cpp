@@ -270,6 +270,13 @@ void HciAdapter::runEventThread()
 						Logger::info(versionInformation.debugText());
 						break;
 					}
+					case Mgmt::EReadAdvertisingFeaturesCommand:
+					{
+					    advertisingFeatures = *reinterpret_cast<AdvertisingFeatures *>(data);
+					    advertisingFeatures.toHost();
+					    Logger::warn(advertisingFeatures.debugText());
+					    break;
+					}
 					case Mgmt::EReadControllerInformationCommand:
 					{
 						if (dataLen != sizeof(ControllerInformation))

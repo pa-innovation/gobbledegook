@@ -692,7 +692,7 @@ void configureAdapter()
 	bool anFlag = (advertisingName.length() == 0 || advertisingName == info.name) && (advertisingShortName.length() == 0 || advertisingShortName == info.shortName);
 
 	// If everything is setup already, we're done
-	if (!pwFlag || !leFlag || !brFlag || !scFlag || !llsFlag || !bnFlag || !cnFlag || !diFlag || !adFlag || !anFlag || !sspFlag || !hcFlag || !fcFlag)
+	if (true || !pwFlag || !leFlag || !brFlag || !scFlag || !llsFlag || !bnFlag || !cnFlag || !diFlag || !adFlag || !anFlag || !sspFlag || !hcFlag || !fcFlag)
 	{
 		// We need it off to start with
 		if (pwFlag)
