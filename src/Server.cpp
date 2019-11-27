@@ -262,7 +262,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	
 	const char *READ_SECURITY_SETTING=dataMap.at("readSecuritySetting").c_str();
 	const char *WRITE_SECURITY_SETTING=dataMap.at("writeSecuritySetting").c_str();
-
+	
 	//
 	// Define the server
 	//
@@ -274,7 +274,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	// list (and not the object that would be added to the list.)
 	objects.back()
 
-    // Service: Device Information (0x180F)
+    // Service: Battery Service (0x180F)
     //
     // This is included because iOS devices like to ping this.
     .gattServiceBegin("battery_service", "180F")
@@ -625,7 +625,47 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             .gattDescriptorEnd()
 
         .gattCharacteristicEnd()
+        
+        // Characteristic: Disconnect Bluetooth (custom: 72fecd2579d44b85929c8222de83eabd)
+        .gattCharacteristicBegin("disconnect", "72fecd2579d44b85929c8222de83eabd", {WRITE_SECURITY_SETTING})
 
+            // Standard characteristic "WriteValue" method call
+            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+	            GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
+	            gsize size;
+	            gconstpointer pPtr = g_variant_get_fixed_array(const_cast<GVariant *>(pAyBuffer), &size, 1);
+	            // TODO: check size == 1
+                uint8_t disco = *static_cast<const uint8_t *>(pPtr);
+
+                self.setDataValue("hardware/disconnect", disco);
+
+                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+                // Characteristic interface (which just so happens to be the same interface passed into our self
+                // parameter) we can that parameter to call our own onUpdatedValue method
+                self.callOnUpdatedValue(pConnection, &disco);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
+            })
+
+            // GATT Descriptor: Characteristic User Description (0x2901)
+            //
+            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+            .gattDescriptorBegin("description", "2901", {"read"})
+
+                // Standard descriptor "ReadValue" method call
+                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+                {
+                    const char *pDescription = "Causes the Server(Peripheral) to disconnect the current connection";
+                    self.methodReturnValue(pInvocation, pDescription, true);
+                })
+
+            .gattDescriptorEnd()
+
+        .gattCharacteristicEnd()
 
         // Characteristic: Volume percent (custom: 5f00e8c711b34e66962d96ef45aae66c)
         .gattCharacteristicBegin("volume", "5f00e8c711b34e66962d96ef45aae66c", {READ_SECURITY_SETTING, WRITE_SECURITY_SETTING})
@@ -818,6 +858,74 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             .gattDescriptorEnd()
 
         .gattCharacteristicEnd()
+        
+        // Characteristic: Read a Random Number (custom: eaf092540c1743eabacdd3a57d6c74af)
+//        .gattCharacteristicBegin("readRandom", "eaf092540c1743eabacdd3a57d6c74af", {READ_SECURITY_SETTING})
+//
+//            // Standard characteristic "ReadValue" method call
+//            .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+//            {
+//                vector<guint32> val;
+//                val = self.getDataValue<const vector<guint8>>("wifi/readRandom", val);
+//                self.methodReturnValue(pInvocation, val, true);
+//            })
+//
+//            // GATT Descriptor: Characteristic User Description (0x2901)
+//            //
+//            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+//            .gattDescriptorBegin("description", "2901", {"read"})
+//
+//                // Standard descriptor "ReadValue" method call
+//                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+//                {
+//                    const char *pDescription = "A random number from Doppler";
+//                    self.methodReturnValue(pInvocation, pDescription, true);
+//                })
+//
+//            .gattDescriptorEnd()
+//
+//        .gattCharacteristicEnd()
+//        
+//        // Characteristic: write a random int (custom: 8757daf9b3e040d78a2bcbcef013c0f6)
+//        .gattCharacteristicBegin("writeRandom", "8757daf9b3e040d78a2bcbcef013c0f6", {WRITE_SECURITY_SETTING})
+//
+//            // Standard characteristic "WriteValue" method call
+//            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+//            {
+//                GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
+//                gsize size;
+//                gconstpointer pPtr = g_variant_get_fixed_array(const_cast<GVariant *>(pAyBuffer), &size, 1);
+//                // TODO: check size == 4
+//                uint32_t nonce = *static_cast<const uint32_t *>(pPtr);
+//
+//                self.setDataValue("wifi/writeRandom", nonce);
+//
+//                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+//                // Characteristic interface (which just so happens to be the same interface passed into our self
+//                // parameter) we can that parameter to call our own onUpdatedValue method
+//                self.callOnUpdatedValue(pConnection, &nonce);
+//
+//                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+//                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+//                // Only "write-without-response" works without this
+//                self.methodReturnVariant(pInvocation, NULL);
+//            })
+//
+//            // GATT Descriptor: Characteristic User Description (0x2901)
+//            //
+//            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+//            .gattDescriptorBegin("description", "2901", {"read"})
+//
+//                // Standard descriptor "ReadValue" method call
+//                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+//                {
+//                    const char *pDescription = "utf-8 encoded json containing the fields \"SSID\" and \"Pass\"";
+//                    self.methodReturnValue(pInvocation, pDescription, true);
+//                })
+//
+//            .gattDescriptorEnd()
+//
+//        .gattCharacteristicEnd()
     .gattServiceEnd()
 
     // Custom Alarm Settings service for Doppler (custom: 447b7a3534ce419a94c18134f94b7889)

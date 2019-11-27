@@ -222,7 +222,10 @@ bool Mgmt::setFC(bool newState)
 // Returns true on success, otherwise false
 bool Mgmt::setAdvertising(uint8_t newState)
 {
+    // TODO turn this off 0x0 always
 	return setState(Mgmt::ESetAdvertisingCommand, controllerIndex, newState);
+	// TODO: use ReadAdvertisingFeaturesCommand to see what we can do
+	// TODO: use EAddAdvertisingCommand
 }
 
 // ---------------------------------------------------------------------------------------------------------------------------------
