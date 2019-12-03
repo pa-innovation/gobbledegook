@@ -216,36 +216,81 @@ bool Mgmt::setFC(bool newState)
     return setState(Mgmt::ESetFastConnectableCommand, controllerIndex, newState ? 1 : 0);
 }
 
-// Set the advertising state to `newState` (0 = disabled, 1 = enabled (with consideration towards the connectable setting),
-// 2 = enabled in connectable mode).
+// Sets a custom advertising using addAdvertising if newState > 0. otherwise calls delAdvertising and setAdvertising(0)
 //
 // Returns true on success, otherwise false
-bool Mgmt::setAdvertising(uint8_t newState)
+bool Mgmt::setAdvertising(bool newState, std::string name, std::string shortName)
 {
-
+    // addAdvertising only works if setAdvertising (the automatic advertiser) is turned off
     if(!setState(Mgmt::ESetAdvertisingCommand, controllerIndex, 0)) {
         Logger::error(SSTR << "Failed to setAdvertising to 0");
         return false;
     }
 
-    if( newState != 0 ) {
-        // Get the Advertising Features to see what we can do.
-        HciAdapter::HciHeader readAdvCmd;
-        readAdvCmd.code = Mgmt::EReadAdvertisingFeaturesCommand;
-        readAdvCmd.controllerId = controllerIndex;
-        readAdvCmd.dataSize = 0;
-        if(!HciAdapter::getInstance().sendCommand(readAdvCmd)) {
-            Logger::error(SSTR << "Failed to send ReadAdvertisingFeaturesCommand");
-            return false;
-        }
+    // Get the Advertising Features to see what we can do.
+    HciAdapter::HciHeader readAdvCmd;
+    readAdvCmd.code = Mgmt::EReadAdvertisingFeaturesCommand;
+    readAdvCmd.controllerId = controllerIndex;
+    readAdvCmd.dataSize = 0;
+    if(!HciAdapter::getInstance().sendCommand(readAdvCmd)) {
+        Logger::error(SSTR << "Failed to send ReadAdvertisingFeaturesCommand");
+        return false;
+    }
 
-        // Now turn all that stuff on (that we want).
+    // TODO: this was the return from the previous command (not sure if this is synchronous here, i may have created an issue)
+    HciAdapter::AdvertisingFeatures availableFeatures = HciAdapter::getInstance().getAdvertisingFeatures();
+    Logger::warn(SSTR << "FEATURES FLAGS ARE " << Utils::hex(availableFeatures.supportedFlags.masks));
+
+    // if there were any previous addAdvertising pages, remove them
+    if( availableFeatures.numInstances != 0 ) {
+        struct RemRequest : HciAdapter::HciHeader
+        {
+            uint8_t instance;
+        } __attribute__((packed));
+
+        int numToRemove = availableFeatures.numInstances;
+        std::vector<uint8_t> instanceNums;
+        for(int i = 0; i < numToRemove; i++) {
+            instanceNums.push_back(availableFeatures.instanceRef[i]);
+        }
+        for(uint8_t instanceNum : instanceNums) {
+            RemRequest removeAdvCmd;
+            removeAdvCmd.code = Mgmt::ERemoveAdvertisingCommand;
+            removeAdvCmd.controllerId = controllerIndex;
+            removeAdvCmd.dataSize = 1;
+            removeAdvCmd.instance = instanceNum;
+            if(!HciAdapter::getInstance().sendCommand(removeAdvCmd)) {
+                Logger::error(SSTR << "Failed to send RemoveAdvertisingCommand");
+                return false;
+            }
+        }
+    }
+
+    // if any advertising was wanted, add custom attributes
+    if( newState ) {
         HciAdapter::AdvertisingSettings wantedFeatures;
         wantedFeatures.masks = HciAdapter::EAdvSwitchConnectable | HciAdapter::EAdvDiscoverable |
-               HciAdapter::EAdvAddFlags | HciAdapter::EAdvAddTX | HciAdapter::EAdvAddAppearance | HciAdapter::EAdvAddLocalName;
+               HciAdapter::EAdvAddFlags | HciAdapter::EAdvAddTX;
+        // Dont use HciAdapter::EAdvAddLocalName (automatic name adding) or this will fail below (we are manually putting names in)
+        // Dont use HciAdapter::EAdvAddAppearance (automatic appearance/CoD) or this will fail (we are manually adding CoD)
+
+        // 0x06 incomplete 128bit service list
+        // 0x09 full name
+        // 0x08 short name
+        // 0x0D class of device (3 bytes) (possibly sent in GAP appearance?)
+
+        // only turn on the features that are available
+        wantedFeatures.masks &= availableFeatures.supportedFlags.masks;
+        Logger::warn(SSTR << "ACTIVATED FEATURES FLAGS ARE " << Utils::hex(wantedFeatures.masks));
         wantedFeatures.toNetwork();
-        const int ADV_DATA_LEN = 22;
-        const int SCAN_RESP_LEN = 27;
+        // 9 bytes for short name "Doppler"
+        // 18 bytes for service list
+        const int ADV_DATA_LEN = 9; //31 bytes max
+
+        // 18 bytes for full name "Doppler-12345678"
+        // 5 bytes for CoD
+        const int SCAN_RESP_LEN = 23; //27 bytes max (4 used for TX and Flags)
+
         struct SRequest : HciAdapter::HciHeader
         {
             uint8_t instance;
@@ -254,8 +299,8 @@ bool Mgmt::setAdvertising(uint8_t newState)
             uint16_t timeout;
             uint8_t advDataLen;
             uint8_t scanRespLen;
-            //uint8_t advData[ADV_DATA_LEN];
-            //uint8_t scanResp[SCAN_RESP_LEN];
+            uint8_t advData[ADV_DATA_LEN];
+            uint8_t scanResp[SCAN_RESP_LEN];
         } __attribute__((packed));
 
         SRequest request;
@@ -267,12 +312,46 @@ bool Mgmt::setAdvertising(uint8_t newState)
         request.flags = wantedFeatures;
         request.duration = 0;
         request.timeout = 0;
-        request.advDataLen = 0;
-        request.scanRespLen = 0;
+        request.advDataLen = ADV_DATA_LEN;
+        request.scanRespLen = SCAN_RESP_LEN;
+
+        request.advData[0] = 8;
+        request.advData[1] = 0x08; // short name
+        memcpy(request.advData + 2, shortName.c_str(), 7);
+        // TODO: this causes the advertiser to freak out
+//        request.advData[9] = 17;
+//        request.advData[10] = 0x06; // incomplete service list
+//        // 0x8e7934bdf06d48f6860483c94e0ec8f9
+//        request.advData[11] = 0x8e;
+//        request.advData[12] = 0x79;
+//        request.advData[13] = 0x34;
+//        request.advData[14] = 0xbd;
+//        request.advData[15] = 0xf0;
+//        request.advData[16] = 0x6d;
+//        request.advData[17] = 0x48;
+//        request.advData[18] = 0xf6;
+//        request.advData[19] = 0x86;
+//        request.advData[20] = 0x04;
+//        request.advData[21] = 0x83;
+//        request.advData[22] = 0xc9;
+//        request.advData[23] = 0x4e;
+//        request.advData[24] = 0x0e;
+//        request.advData[25] = 0xc8;
+//        request.advData[26] = 0xf9;
+
+        request.scanResp[0] = 17;
+        request.scanResp[1] = 0x09; // full name
+        memcpy(request.scanResp + 2, name.c_str(), 16);
+        // TODO: this doesnt seem to work
+        request.scanResp[18] = 4;
+        request.scanResp[19] = 0x0D; // CoD
+        request.scanResp[20] = 0x20;
+        request.scanResp[21] = 0x04;
+        request.scanResp[22] = 0x14;
 
         return(HciAdapter::getInstance().sendCommand(request));
     }
-    // TODO: Mgmt::ERemoveAdvertsingCommand to remove all the indexes
+
     return false;
 }
 

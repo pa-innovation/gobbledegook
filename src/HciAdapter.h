@@ -1143,6 +1143,8 @@ public:
         uint8_t maxScanRsp;
         uint8_t maxInstances;
         uint8_t numInstances;
+        // TODO: i couldnt figure out how to pack this as a pointer, current max instances is "5"
+        uint8_t instanceRef[5];
 
         void toNetwork() {
             supportedFlags.toNetwork();
@@ -1161,6 +1163,9 @@ public:
             text += "  + Max Scan Resp Len: " + std::to_string(maxScanRsp) + "\n";
             text += "  + Max Instances    : " + std::to_string(maxInstances) + "\n";
             text += "  + Num Instances    : " + std::to_string(numInstances) + "\n";
+            for(int i=0; i<numInstances; i++) {
+                text += "  + Instances[" + std::to_string(i) + "] : " + std::to_string(instanceRef[i]) + "\n";
+            }
             return text;
         }
     }__attribute__((packed));

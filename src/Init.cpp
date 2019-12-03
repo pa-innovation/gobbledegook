@@ -793,7 +793,7 @@ void configureAdapter()
 //		{
 			Logger::info(SSTR << (TheServer->getEnableAdvertising() ? "Enabling":"Disabling") << " Advertising");
 			// Turn on advertising with setting "0x02" which will advertise regardless of connectable setting
-			if (!mgmt.setAdvertising(TheServer->getEnableAdvertising() ? 2 : 0)) { Logger::error(SSTR << "Failed to setAdvertising"); setRetry(); return; }
+			if (!mgmt.setAdvertising(TheServer->getEnableAdvertising() ? true : false, advertisingName, advertisingShortName)) { Logger::error(SSTR << "Failed to setAdvertising"); setRetry(); return; }
 //		}
 
 		// Set the name?

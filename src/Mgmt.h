@@ -268,11 +268,10 @@ struct Mgmt
     // Returns true on success, otherwise false
     bool setFC(bool newState);
 
-	// Set the advertising state to `newState` (0 = disabled, 1 = enabled (with consideration towards the connectable setting),
-	// 2 = enabled in connectable mode).
+	// Set the advertising state on or off and uses name/shortName if "on"
 	//
 	// Returns true on success, otherwise false
-	bool setAdvertising(uint8_t newState);
+	bool setAdvertising(bool newState, std::string name, std::string shortName);
 
 	//
 	// Utilitarian
