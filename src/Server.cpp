@@ -1200,7 +1200,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Standard descriptor "ReadValue" method call
                 .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
                 {
-                    const char *pDescription = "Write an UTF-8 json formatted string of the sound file to play and volume percent. Example {\"sound\":\"foo.mp3\", \"vol\":\"70\"}";
+                    const char *pDescription = "Write an UTF-8 json formatted string of the sound file to play and volume percent. Example {\"sound\":\"foo.mp3\", \"vol\":70}";
                     self.methodReturnValue(pInvocation, pDescription, true);
                 })
 
