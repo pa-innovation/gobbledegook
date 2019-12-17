@@ -403,12 +403,16 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 gsize size;
                 gconstpointer pPtr = g_variant_get_fixed_array(const_cast<GVariant *>(g_variant_get_child_value(pParameters, 0)), &size, 1);
 
-                self.setDataPointer("hardware/displaycolor", pPtr);
-
-                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
-                // Characteristic interface (which just so happens to be the same interface passed into our self
-                // parameter) we can that parameter to call our own onUpdatedValue method
-                self.callOnUpdatedValue(pConnection, pUserData);
+				if(size == 3) {
+	                self.setDataPointer("hardware/displaycolor", pPtr);
+	
+	                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+	                // Characteristic interface (which just so happens to be the same interface passed into our self
+	                // parameter) we can that parameter to call our own onUpdatedValue method
+	                self.callOnUpdatedValue(pConnection, pUserData);
+                } else {
+                	Logger::error(SSTR << "Failed updating display color: invalid array size " << size);
+                }
 
                 // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
                 // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
@@ -467,12 +471,16 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 gsize size;
                 gconstpointer pPtr = g_variant_get_fixed_array(const_cast<GVariant *>(g_variant_get_child_value(pParameters, 0)), &size, 1);
 
-                self.setDataPointer("hardware/buttoncolor", pPtr);
-
-                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
-                // Characteristic interface (which just so happens to be the same interface passed into our self
-                // parameter) we can that parameter to call our own onUpdatedValue method
-                self.callOnUpdatedValue(pConnection, pUserData);
+				if(size == 3) {
+	                self.setDataPointer("hardware/buttoncolor", pPtr);
+	
+	                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+	                // Characteristic interface (which just so happens to be the same interface passed into our self
+	                // parameter) we can that parameter to call our own onUpdatedValue method
+	                self.callOnUpdatedValue(pConnection, pUserData); 
+                } else {
+                	Logger::error(SSTR << "Failed updating button color: invalid array size " << size);
+                }
 
                 // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
                 // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
@@ -1192,7 +1200,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Standard descriptor "ReadValue" method call
                 .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
                 {
-                    const char *pDescription = "Write an utf-8 string of a test sound to play";
+                    const char *pDescription = "Write an UTF-8 json formatted string of the sound file to play and volume percent. Example {\"sound\":\"foo.mp3\", \"vol\":\"70\"}";
                     self.methodReturnValue(pInvocation, pDescription, true);
                 })
 
@@ -1842,6 +1850,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	             * but that converts as an empty char string if the first data is 0, so do it the long way.
 	             */
 	            // this is just what that internal call would do anyway, forcing a conversion as a byte array
+	            // TODO: check that pTimeData has 2 bytes
 	            GVariant *pVariant = Utils::gvariantFromByteArray(pTimeData, 2);
 	            self.methodReturnVariant(pInvocation, pVariant, true);
 			})
