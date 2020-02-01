@@ -194,6 +194,23 @@ void ServerUtils::getManagedObjects(GDBusMethodInvocation *pInvocation)
 	g_dbus_method_invocation_return_value(pInvocation, pParams);
 }
 
+// Sometimes you get an additional parameter back that the previous read was only partial and
+//  needs a subsequent chunk starting at "offset". if "offset" exists in the pParameters
+//  we need to move the char * that many bytes forward. as an example, this happens on iOS
+//  devices attempting a read of over 184 bytes.
+uint16_t ServerUtils::getOffsetFromParameters(GVariant *pParameters)
+{
+	GVariant *params;
+	g_variant_get(pParameters, "(@a{sv})", &params);
+	uint16_t offset = 0;
+	GVariant *value = g_variant_lookup_value(params, "offset", NULL);
+	if (value) 
+	{
+		g_variant_get(value, "q", &offset);
+	}
+	return offset;
+}
+
 // WARNING: Hacky code - don't count on this working properly on all systems
 //
 // This routine will attempt to parse /proc/cpuinfo to return the CPU count/model. Results are cached on the first call, with

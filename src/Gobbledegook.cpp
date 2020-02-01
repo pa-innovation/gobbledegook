@@ -481,7 +481,7 @@ int ggkStart(const std::map<const std::string, const std::string> &dataMap,
 			}
 		}, nullptr);
 
-                std::string servName = dataMap.at("advertisingName");
+        std::string servName = dataMap.at("advertisingName");
 		Logger::info(SSTR << "Starting GGK server '" << servName << "'");
 
 		// Allocate our server

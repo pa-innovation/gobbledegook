@@ -1141,6 +1141,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
                 const char *sounds = self.getDataPointer<const char *>("alarm/sounds", "");
+                sounds += ServerUtils::getOffsetFromParameters(pParameters);
                 self.methodReturnValue(pInvocation, sounds, true);
             })
 
@@ -1163,7 +1164,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 // Standard descriptor "ReadValue" method call
                 .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
                 {
-                    const char *pDescription = "List of sound filenames separated by '/' characters";
+                    const char *pDescription = "List of sound filenames in json format";
                     self.methodReturnValue(pInvocation, pDescription, true);
                 })
 
