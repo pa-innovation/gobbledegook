@@ -165,6 +165,8 @@
 #include "GattDescriptor.h"
 #include "Logger.h"
 
+#include "string.h"
+
 // TODO: remove these headers that are being used for debugging
 #include <iostream>
 using namespace std;
