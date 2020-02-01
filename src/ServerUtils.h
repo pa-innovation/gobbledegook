@@ -35,7 +35,7 @@ struct ServerUtils
 	static void getManagedObjects(GDBusMethodInvocation *pInvocation);
 
 	// Devices will sometimes perform reads on long buffers in multiple chunks, this returns an offset if that occurs.
-	static uint16_t getOffsetFromParameters(GVariant *params);
+	static uint16_t getOffsetFromParameters(GVariant *params, uint16_t dataLength);
 
 	// WARNING: Hacky code - don't count on this working properly on all systems
 	//

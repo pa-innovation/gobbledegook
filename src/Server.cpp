@@ -1141,7 +1141,8 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
             .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
             {
                 const char *sounds = self.getDataPointer<const char *>("alarm/sounds", "");
-                sounds += ServerUtils::getOffsetFromParameters(pParameters);
+                uint16_t offset = ServerUtils::getOffsetFromParameters(pParameters, strlen(sounds));
+                sounds += offset;
                 self.methodReturnValue(pInvocation, sounds, true);
             })
 

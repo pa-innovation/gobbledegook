@@ -198,7 +198,11 @@ void ServerUtils::getManagedObjects(GDBusMethodInvocation *pInvocation)
 //  needs a subsequent chunk starting at "offset". if "offset" exists in the pParameters
 //  we need to move the char * that many bytes forward. as an example, this happens on iOS
 //  devices attempting a read of over 184 bytes.
-uint16_t ServerUtils::getOffsetFromParameters(GVariant *pParameters)
+//
+// It is important that the maximum value not exceed the current data that this offset will
+//  be applied to. An attacker can easily ask for an offset that is well beyond the data they
+//  are supposed to have access to.
+uint16_t ServerUtils::getOffsetFromParameters(GVariant *pParameters, uint16_t dataLength)
 {
 	GVariant *params;
 	g_variant_get(pParameters, "(@a{sv})", &params);
@@ -207,6 +211,11 @@ uint16_t ServerUtils::getOffsetFromParameters(GVariant *pParameters)
 	if (value) 
 	{
 		g_variant_get(value, "q", &offset);
+	}
+	if (offset > dataLength)
+	{
+		Logger::error(SSTR << "Attempt to get read offset beyond scope of data. Offset: " << offset << " vs. maximum length: " << dataLength);
+		offset = dataLength;
 	}
 	return offset;
 }
