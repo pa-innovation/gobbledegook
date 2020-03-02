@@ -291,6 +291,22 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
     .gattServiceEnd()
 
+    // Service: Generic Attribute Service (0x1801)
+    //
+    // This is included because it should cause devices not to try and cache our services
+//    .gattServiceBegin("gattService", "1801")
+//        .gattCharacteristicBegin("serviceChanged", "2A05", {"notify"})
+//            // Standard characteristic "ReadValue" method call
+//            .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+//            {
+//                //two 16bit handles representing the range of the change
+//	        uint32_t nothingChanges = 0;
+//                self.methodReturnValue(pInvocation, nothingChanges, true);
+//            })
+//
+//        .gattCharacteristicEnd()
+//    .gattServiceEnd()
+
 	// Service: Device Information (0x180A)
 	//
 	// See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.service.device_information.xml
@@ -722,6 +738,63 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
                 {
                     const char *pDescription = "Volume to set the system to as a percent.";
+                    self.methodReturnValue(pInvocation, pDescription, true);
+                })
+
+            .gattDescriptorEnd()
+
+        .gattCharacteristicEnd()
+
+        // Characteristic: Update System Software (custom: 030249f40ded40ec8832a4dda5963f7f)
+        .gattCharacteristicBegin("update", "030249f40ded40ec8832a4dda5963f7f", {READ_SECURITY_SETTING, WRITE_SECURITY_SETTING, "notify"})
+
+            // Standard characteristic "ReadValue" method call
+            .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                const char *updateString = self.getDataPointer<const char *>("hardware/update", "");
+                uint16_t offset = ServerUtils::getOffsetFromParameters(pParameters, strlen(updateString));
+                updateString += offset;
+                self.methodReturnValue(pInvocation, updateString, true);
+            })
+
+            // Standard characteristic "WriteValue" method call
+            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                // Update the text string value
+                GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
+                self.setDataPointer("hardware/update", Utils::stringFromGVariantByteArray(pAyBuffer).c_str());
+
+                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+                // Characteristic interface (which just so happens to be the same interface passed into our self
+                // parameter) we can that parameter to call our own onUpdatedValue method
+                self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
+            })
+
+            // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
+            // updates to our value. These updates may have come from our own server or some other source.
+            //
+            // We can handle updates in any way we wish, but the most common use is to send a change notification.
+            .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
+            {
+                const char *updateString = self.getDataPointer<const char *>("hardware/update", "");
+                self.sendChangeNotificationValue(pConnection, updateString);
+                return true;
+            })
+
+            // GATT Descriptor: Characteristic User Description (0x2901)
+            //
+            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+            .gattDescriptorBegin("description", "2901", {"read"})
+
+                // Standard descriptor "ReadValue" method call
+                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+                {
+                    const char *pDescription = "Notifies when a system update is available to apply. Write a value to accept.";
                     self.methodReturnValue(pInvocation, pDescription, true);
                 })
 
