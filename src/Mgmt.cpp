@@ -283,13 +283,13 @@ bool Mgmt::setAdvertising(bool newState, std::string name, std::string shortName
         wantedFeatures.masks &= availableFeatures.supportedFlags.masks;
         Logger::warn(SSTR << "ACTIVATED FEATURES FLAGS ARE " << Utils::hex(wantedFeatures.masks));
         wantedFeatures.toNetwork();
-        // 9 bytes for short name "Doppler"
-        // 18 bytes for service list
-        const int ADV_DATA_LEN = 9; //31 bytes max
-
         // 18 bytes for full name "Doppler-12345678"
         // 5 bytes for CoD
-        const int SCAN_RESP_LEN = 23; //27 bytes max (4 used for TX and Flags)
+        const int ADV_DATA_LEN = 23; //31 bytes max
+
+        // 9 bytes for short name "Doppler"
+        // 18 bytes for service list
+        const int SCAN_RESP_LEN = 27; //27 bytes max (4 of them were used for flags and tx)
 
         struct SRequest : HciAdapter::HciHeader
         {
@@ -315,39 +315,42 @@ bool Mgmt::setAdvertising(bool newState, std::string name, std::string shortName
         request.advDataLen = ADV_DATA_LEN;
         request.scanRespLen = SCAN_RESP_LEN;
 
-        request.advData[0] = 8;
-        request.advData[1] = 0x08; // short name
-        memcpy(request.advData + 2, shortName.c_str(), 7);
-        // TODO: this causes the advertiser to freak out
-//        request.advData[9] = 17;
-//        request.advData[10] = 0x06; // incomplete service list
-//        // 0x8e7934bdf06d48f6860483c94e0ec8f9
-//        request.advData[11] = 0x8e;
-//        request.advData[12] = 0x79;
-//        request.advData[13] = 0x34;
-//        request.advData[14] = 0xbd;
-//        request.advData[15] = 0xf0;
-//        request.advData[16] = 0x6d;
-//        request.advData[17] = 0x48;
-//        request.advData[18] = 0xf6;
-//        request.advData[19] = 0x86;
-//        request.advData[20] = 0x04;
-//        request.advData[21] = 0x83;
-//        request.advData[22] = 0xc9;
-//        request.advData[23] = 0x4e;
-//        request.advData[24] = 0x0e;
-//        request.advData[25] = 0xc8;
-//        request.advData[26] = 0xf9;
+        request.advData[0] = 17;
+        request.advData[1] = 0x09; // full name
+        memcpy(request.advData + 2, name.c_str(), 16);
+
+        // TODO: this doesnt seem to work
+        request.advData[18] = 4;
+        request.advData[19] = 0x0D; // CoD
+        request.advData[20] = 0x20;
+        request.advData[21] = 0x04;
+        request.advData[22] = 0x14;
 
         request.scanResp[0] = 17;
-        request.scanResp[1] = 0x09; // full name
-        memcpy(request.scanResp + 2, name.c_str(), 16);
-        // TODO: this doesnt seem to work
-        request.scanResp[18] = 4;
-        request.scanResp[19] = 0x0D; // CoD
-        request.scanResp[20] = 0x20;
-        request.scanResp[21] = 0x04;
-        request.scanResp[22] = 0x14;
+        request.scanResp[1] = 0x06; // incomplete service list
+        // 0x8e7934bdf06d48f6860483c94e0ec8f9
+        request.scanResp[2] = 0x8e;
+        request.scanResp[3] = 0x79;
+        request.scanResp[4] = 0x34;
+        request.scanResp[5] = 0xbd;
+        request.scanResp[6] = 0xf0;
+        request.scanResp[7] = 0x6d;
+        request.scanResp[8] = 0x48;
+        request.scanResp[9] = 0xf6;
+        request.scanResp[10] = 0x86;
+        request.scanResp[11] = 0x04;
+        request.scanResp[12] = 0x83;
+        request.scanResp[13] = 0xc9;
+        request.scanResp[14] = 0x4e;
+        request.scanResp[15] = 0x0e;
+        request.scanResp[16] = 0xc8;
+        request.scanResp[17] = 0xf9;
+
+        request.scanResp[18] = 8;
+        request.scanResp[19] = 0x08; // short name
+        // note: the shortName string is not used because it must match EXACTLY the
+        //  first characters of the long name or it will be rejected
+        memcpy(request.scanResp + 20, name.c_str(), 7);
 
         return(HciAdapter::getInstance().sendCommand(request));
     }
