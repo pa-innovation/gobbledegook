@@ -274,7 +274,7 @@ void HciAdapter::runEventThread()
 					{
 					    advertisingFeatures = *reinterpret_cast<AdvertisingFeatures *>(data);
 					    advertisingFeatures.toHost();
-					    Logger::warn(advertisingFeatures.debugText());
+					    Logger::info(advertisingFeatures.debugText());
 					    break;
 					}
 					case Mgmt::EReadControllerInformationCommand:

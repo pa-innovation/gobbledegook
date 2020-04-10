@@ -156,7 +156,7 @@ bool HciSocket::read(std::vector<uint8_t> &response) const
 
 	std::string dump = "";
 	dump += "  > Read " + std::to_string(response.size()) + " bytes\n";
-	dump += Utils::hex(response.data(), response.size());
+	// dump += Utils::hex(response.data(), response.size());
 	Logger::info(dump);
 
 	return true;
@@ -177,7 +177,7 @@ bool HciSocket::write(const uint8_t *pBuffer, size_t count) const
 {
 	std::string dump = "";
 	dump += "  > Writing " + std::to_string(count) + " bytes\n";
-	dump += Utils::hex(pBuffer, count);
+	// dump += Utils::hex(pBuffer, count);
 	Logger::info(dump);
 
 	size_t len = ::write(fdSocket, pBuffer, count);
