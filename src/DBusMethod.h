@@ -95,7 +95,7 @@ struct DBusMethod
 			return;
 		}
 
-		Logger::info(SSTR << "Calling method: [" << path << "]:[" << interfaceName << "]:[" << methodName << "]:Data:" << g_variant_print(pParameters,0));
+		//Logger::info(SSTR << "Calling method: [" << path << "]:[" << interfaceName << "]:[" << methodName << "]:Data:" << g_variant_print(pParameters,0));
 		callback(*static_cast<const T *>(pOwner), pConnection, methodName, pParameters, pInvocation, pUserData);
 	}
 
