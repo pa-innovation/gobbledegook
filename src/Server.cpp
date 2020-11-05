@@ -191,6 +191,7 @@ namespace ggk {
 std::shared_ptr<Server> TheServer = nullptr;
 
 // Setting these as globals for easy retreival inside the lamdas
+static std::string gProdID = "";
 static std::string gSerialNum = "";
 static std::string gFirmwareRev = "";
 static std::string gHardwareRev = "";
@@ -240,6 +241,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	std::transform(this->serviceName.begin(), this->serviceName.end(), this->serviceName.begin(), ::tolower);
 	this->advertisingName = dataMap.at("advertisingName");
 	this->advertisingShortName = dataMap.at("advertisingShortName");
+	gProdID = dataMap.at("productID");
 	gSerialNum = dataMap.at("serialNumber");
 	gFirmwareRev = dataMap.at("firmwareRevision");
 	gHardwareRev = dataMap.at("hardwareRevision");
@@ -333,7 +335,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 			// Standard characteristic "ReadValue" method call
 			.onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
 			{
-				self.methodReturnValue(pInvocation, "Sandman", true);
+				self.methodReturnValue(pInvocation, gProdID, true);
 			})
 
 		.gattCharacteristicEnd()
