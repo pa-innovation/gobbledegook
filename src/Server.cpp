@@ -901,6 +901,47 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 
         .gattCharacteristicEnd()
 
+        // Characteristic: API key to MQTT (custom: 57df3bea753f4b9c8dd45508c8315d02)
+        .gattCharacteristicBegin("api_key", "57df3bea753f4b9c8dd45508c8315d02", {READ_SECURITY_SETTING,"notify"})
+
+
+            // Standard characteristic "ReadValue" method call
+            .onReadValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                const char *updateString = self.getDataPointer<const char *>("wifi/api_key", "");
+                uint16_t offset = ServerUtils::getOffsetFromParameters(pParameters, strlen(updateString));
+                updateString += offset;
+                self.methodReturnValue(pInvocation, updateString, true);
+            })
+
+            // Here we use the onUpdatedValue to set a callback that isn't exposed to BlueZ, but rather allows us to manage
+            // updates to our value. These updates may have come from our own server or some other source.
+            //
+            // We can handle updates in any way we wish, but the most common use is to send a change notification.
+            .onUpdatedValue(CHARACTERISTIC_UPDATED_VALUE_CALLBACK_LAMBDA
+            {
+                const char *updateString = self.getDataPointer<const char *>("wifi/api_key", "");
+                self.sendChangeNotificationValue(pConnection, updateString);
+                return true;
+            })
+
+
+            // GATT Descriptor: Characteristic User Description (0x2901)
+            //
+            // See: https://www.bluetooth.com/specifications/gatt/viewer?attributeXmlFile=org.bluetooth.descriptor.gatt.characteristic_user_description.xml
+            .gattDescriptorBegin("description", "2901", {"read"})
+
+                // Standard descriptor "ReadValue" method call
+                .onReadValue(DESCRIPTOR_METHOD_CALLBACK_LAMBDA
+                {
+                    const char *pDescription = "string of the api key this doppler uses to access MQTT";
+                    self.methodReturnValue(pInvocation, pDescription, true);
+                })
+
+            .gattDescriptorEnd()
+
+        .gattCharacteristicEnd()
+
         // Characteristic: Connect to SSID (custom: 4fdaabaab9ec4624a1a76febcf9e6901)
         .gattCharacteristicBegin("connect", "4fdaabaab9ec4624a1a76febcf9e6901", {WRITE_SECURITY_SETTING})
 
