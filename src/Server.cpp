@@ -902,7 +902,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
         .gattCharacteristicEnd()
 
         // Characteristic: API key to MQTT (custom: 57df3bea753f4b9c8dd45508c8315d02)
-        .gattCharacteristicBegin("api_key", "57df3bea753f4b9c8dd45508c8315d02", {READ_SECURITY_SETTING,"notify"})
+        .gattCharacteristicBegin("api_key", "57df3bea753f4b9c8dd45508c8315d02", {READ_SECURITY_SETTING,WRITE_SECURITY_SETTING})
 
 
             // Standard characteristic "ReadValue" method call
@@ -925,6 +925,23 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
                 return true;
             })
 
+            // Standard characteristic "WriteValue" method call
+            .onWriteValue(CHARACTERISTIC_METHOD_CALLBACK_LAMBDA
+            {
+                // Update the text string value
+                GVariant *pAyBuffer = g_variant_get_child_value(pParameters, 0);
+                self.setDataPointer("wifi/api_key", Utils::stringFromGVariantByteArray(pAyBuffer).c_str());
+
+                // Since all of these methods (onReadValue, onWriteValue, onUpdateValue) are all part of the same
+                // Characteristic interface (which just so happens to be the same interface passed into our self
+                // parameter) we can that parameter to call our own onUpdatedValue method
+                self.callOnUpdatedValue(pConnection, pUserData);
+
+                // Note: Even though the WriteValue method returns void, it's important to return like this, so that a
+                // dbus "method_return" is sent, otherwise the client gets an error (ATT error code 0x0e"unlikely").
+                // Only "write-without-response" works without this
+                self.methodReturnVariant(pInvocation, NULL);
+            })
 
             // GATT Descriptor: Characteristic User Description (0x2901)
             //
