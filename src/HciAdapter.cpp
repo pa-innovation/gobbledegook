@@ -344,6 +344,18 @@ void HciAdapter::runEventThread()
 				DeviceConnectedEvent event(responsePacket);
 				activeConnections += 1;
 				Logger::info(SSTR << "  > Connection count incremented to " << activeConnections);
+		                // TODO: fix this hack
+                		/**
+                 		* To anyone reading this, the proper thing to do here is probably register a callback into HciAdapter
+                 		* that can send asynchronous events back to the application which is running it. HCI shouldnt know
+                 		* anything about TheServer... however i am in a hurry today so i am just plumbing an already existing
+                 		* communication method (our dataSetter for GATT services) down here and hacking a string value that
+                 		* wont be used to listen to in my GATT profile.
+				* ... and i did it again here to see connecting/disconnecting devices for a test.
+                 		*/
+                		if( (hackCallback)("GGK/EVENT/EClientConnected", static_cast<const void *>(&activeConnections)) == 0 ) {
+                    			Logger::error(SSTR << "Unable to update EClientConnected on data setter");
+                		}
 				break;
 			}
 			// Device disconnected event
@@ -353,6 +365,21 @@ void HciAdapter::runEventThread()
 				if (activeConnections > 0)
 				{
 					activeConnections -= 1;
+					if( activeConnections == 0) {
+				                // TODO: fix this hack
+       			         		/**
+        	        	 		* To anyone reading this, the proper thing to do here is probably register a callback into HciAdapter
+                 				* that can send asynchronous events back to the application which is running it. HCI shouldnt know
+                 				* anything about TheServer... however i am in a hurry today so i am just plumbing an already existing
+	                	 		* communication method (our dataSetter for GATT services) down here and hacking a string value that
+        		         		* wont be used to listen to in my GATT profile.
+						* ... and i did it again here to see connecting/disconnecting devices for a test.
+                 				*/
+                				if( (hackCallback)("GGK/EVENT/EClientDisconnected", static_cast<const void *>(&activeConnections)) == 0 ) {
+                    					Logger::error(SSTR << "Unable to update EClientDisconnected on data setter");
+                				}
+					}
+
 					Logger::info(SSTR << "  > Connection count decremented to " << activeConnections);
 				}
 				else
