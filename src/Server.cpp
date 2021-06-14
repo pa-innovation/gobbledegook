@@ -253,7 +253,7 @@ Server::Server(const std::map<const std::string, const std::string> &dataMap,
 	dataSetter = setter;
 
 	// Adapter configuration flags - set these flags based on how you want the adapter configured
-	enableBREDR = dataMap.at("enableBREDR") == "true";
+	enableBREDR = dataMap.at("enableBREDR") == "false";
 	enableSecureConnection = dataMap.at("enableSecureConnection") == "true";
 	enableLinkLayerSecurity = dataMap.at("enableLinkLayerSecurity") == "true";
 	enableConnectable = dataMap.at("enableConnectable") == "true";
