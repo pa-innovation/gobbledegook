@@ -71,24 +71,26 @@ public:
 	//
 
 	// HCI Controller Settings
+	//the notes in this struct represent whether we need these parameters to be set when initializing the
+	//adapter for ggk gatt coming up and BR/EDR coming down
 	enum HciControllerSettings
 	{
-		EHciPowered = (1<<0),
-		EHciConnectable = (1<<1),
-		EHciFastConnectable = (1<<2),
-		EHciDiscoverable = (1<<3),
-		EHciBondable = (1<<4),
-		EHciLinkLevelSecurity = (1<<5),
-		EHciSecureSimplePairing = (1<<6),
-		EHciBasicRate_EnhancedDataRate = (1<<7),
-		EHciHighSpeed = (1<<8),
-		EHciLowEnergy = (1<<9),
-		EHciAdvertising = (1<<10),
-		EHciSecureConnections = (1<<11),
-		EHciDebugKeys = (1<<12),
-		EHciPrivacy = (1<<13),
-		EHciControllerConfiguration = (1<<14),
-		EHciStaticAddress = (1<<15)
+		EHciPowered = (1<<0),                   //both  //must turn off first before turning on.
+		EHciConnectable = (1<<1),               //both
+		EHciFastConnectable = (1<<2),           //optional both
+		EHciDiscoverable = (1<<3),              //both
+		EHciBondable = (1<<4),                  //ggk
+		EHciLinkLevelSecurity = (1<<5),         //ggk, possibly a2dp both
+		EHciSecureSimplePairing = (1<<6),       //both
+		EHciBasicRate_EnhancedDataRate = (1<<7),//a2dp only
+		EHciHighSpeed = (1<<8),                 //a2dp only
+		EHciLowEnergy = (1<<9),                 //ggk only
+		EHciAdvertising = (1<<10),              //both
+		EHciSecureConnections = (1<<11),        //ggk
+		EHciDebugKeys = (1<<12),                //neither
+		EHciPrivacy = (1<<13),                  //neither
+		EHciControllerConfiguration = (1<<14),  //unknown
+		EHciStaticAddress = (1<<15)             //neither
 	};
 
     // Advertising Features Settings
