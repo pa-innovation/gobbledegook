@@ -827,6 +827,7 @@ void unConfigureAdapter()
     Mgmt mgmt;
 
     mgmt.setAdvertising(false, std::string("Doppler"), std::string("Doppler"));
+    mgmt.removeAdvertising(1);
     // Get our properly truncated advertising names
     std::string advertisingName = Mgmt::truncateName(std::string("Doppler"));
     std::string advertisingShortName = Mgmt::truncateShortName(std::string("Doppler"));

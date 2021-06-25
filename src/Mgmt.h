@@ -273,6 +273,8 @@ struct Mgmt
 	// Returns true on success, otherwise false
 	bool setAdvertising(bool newState, std::string name, std::string shortName);
 
+	//Calls the bluez API's remove advertising call
+	bool removeAdvertising(uint8_t instance);
 	//
 	// Utilitarian
 	//

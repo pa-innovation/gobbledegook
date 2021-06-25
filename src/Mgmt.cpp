@@ -358,6 +358,26 @@ bool Mgmt::setAdvertising(bool newState, std::string name, std::string shortName
     return false;
 }
 
+bool Mgmt::removeAdvertising(uint8_t instance)
+{
+    struct SRequest : HciAdapter::HciHeader
+            {
+                uint8_t instance;
+            } __attribute__((packed));
+
+    SRequest removeAdvCmd;
+    removeAdvCmd.code=ERemoveAdvertisingCommand;
+    removeAdvCmd.controllerId = controllerIndex;
+    removeAdvCmd.dataSize = 1;
+    removeAdvCmd.instance = instance;
+    if(!HciAdapter::getInstance().sendCommand(removeAdvCmd)) {
+        Logger::error(SSTR << "Failed to send RemoveAdvertsingCommand");
+        return false;
+    }
+    return true;
+}
+
+
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Utilitarian
 // ---------------------------------------------------------------------------------------------------------------------------------
