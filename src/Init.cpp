@@ -289,6 +289,7 @@ void shutdown()
 	// Our new state: shutting down
 	setServerRunState(EStopping);
 
+
 	unConfigureAdapter();  //configure the hci adapter for BR/EDR
 
 	// Stop our HciAdapter
@@ -825,9 +826,10 @@ void unConfigureAdapter()
 {
     Mgmt mgmt;
 
+    mgmt.setAdvertising(false, std::string("Doppler"), std::string("Doppler"));
     // Get our properly truncated advertising names
-    std::string advertisingName = Mgmt::truncateName(TheServer->getAdvertisingName());
-    std::string advertisingShortName = Mgmt::truncateShortName(TheServer->getAdvertisingShortName());
+    std::string advertisingName = Mgmt::truncateName(std::string("Doppler"));
+    std::string advertisingShortName = Mgmt::truncateShortName(std::string("Doppler"));
 
 
 // We need it off to start with
@@ -838,10 +840,10 @@ void unConfigureAdapter()
 // Enable the LE state (we always set this state if it's not set)
 
     Logger::info("Enabling LE");
-    if (!mgmt.setLE(true)) { setRetry(); return; }
+    if (!mgmt.setLE(false)) { setRetry(); return; }
 
 
-// Change the Br/Edr state?
+// Change the Br/Edr state?    //we think the comment is wrong
 //
 // Note that enabling this requries LE to already be enabled or this command will receive a 'rejected' result
 
