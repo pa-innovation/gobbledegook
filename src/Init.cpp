@@ -286,11 +286,12 @@ void shutdown()
 		return;
 	}
 
+	unConfigureAdapter();  //configure the hci adapter for BR/EDR
 	// Our new state: shutting down
 	setServerRunState(EStopping);
 
 
-	unConfigureAdapter();  //configure the hci adapter for BR/EDR
+
 
 	// Stop our HciAdapter
 	HciAdapter::getInstance().stop();
@@ -826,8 +827,7 @@ void unConfigureAdapter()
 {
     Mgmt mgmt;
 
-    mgmt.setAdvertising(false, std::string("Doppler"), std::string("Doppler"));
-    mgmt.removeAdvertising(1);
+
     // Get our properly truncated advertising names
     std::string advertisingName = Mgmt::truncateName(std::string("Doppler"));
     std::string advertisingShortName = Mgmt::truncateShortName(std::string("Doppler"));
@@ -839,17 +839,18 @@ void unConfigureAdapter()
     if (!mgmt.setPowered(false)) { setRetry(); return; }
 
 // Enable the LE state (we always set this state if it's not set)
-
+// we enable LE so we can turn on BR/EDR and then turn off LE again
     Logger::info("Enabling LE");
-    if (!mgmt.setLE(false)) { setRetry(); return; }
+    if (!mgmt.setLE(true)) { setRetry(); return; }
 
 
-// Change the Br/Edr state?    //we think the comment is wrong
-//
 // Note that enabling this requries LE to already be enabled or this command will receive a 'rejected' result
 
     Logger::info(SSTR << ( "Enabling BR/EDR"));
     if (!mgmt.setBredr(true)) { setRetry(); return; }
+
+    Logger::info("Disabling LE");
+        if (!mgmt.setLE(false)) { setRetry(); return; }
 
 
 //secure simple pairing if BREDR is enabled
@@ -899,16 +900,8 @@ void unConfigureAdapter()
 
 
 // Change the Advertising state?
-
-    Logger::info(SSTR << ("Enabling Advertising"));
-    // Turn on advertising with setting "0x02" which will advertise regardless of connectable setting
-    if (!mgmt.setAdvertising(true, advertisingName, advertisingShortName)) { Logger::error(SSTR << "Failed to setAdvertising"); setRetry(); return; }
-
-
-// Set the name?
-
-    Logger::info(SSTR << "Setting advertising name to '" << advertisingName << "' (with short name: '" << advertisingShortName << "')");
-    if (!mgmt.setName(advertisingName.c_str(), advertisingShortName.c_str())) { setRetry(); return; }
+    mgmt.setAdvertising(false, std::string("Doppler"), std::string("Doppler"));
+   // mgmt.removeAdvertising(1);
 
 
     // Turn it back on
@@ -916,7 +909,6 @@ void unConfigureAdapter()
     if (!mgmt.setPowered(true)) { setRetry(); return; }
 
     Logger::info("The Bluetooth adapter is fully unconfigured for BR/EDR use");
-
 
 }
 
